@@ -1,0 +1,106 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Poker Timer</title>
+</head>
+<body style="font-family:system-ui;max-width:720px;margin:24px auto;padding:0 12px;">
+  <h1>Poker Timer</h1>
+
+  <div style="display:flex;gap:8px;flex-wrap:wrap;">
+    <button id="create">Создать турнир (room)</button>
+    <input id="room" placeholder="roomId (например final-2026-03-03)" style="flex:1;min-width:260px;"/>
+    <button id="openAdmin">Открыть админ</button>
+    <button id="openDisplay">Открыть экран</button>
+  </div>
+
+  <p id="out" style="margin-top:16px;white-space:pre-wrap;"></p>
+
+  <script src="config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const sb = supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
+
+    function rid() {
+      const v = document.getElementById('room').value.trim();
+      return v || ("room-" + Math.random().toString(16).slice(2,10));
+    }
+
+    function defaultState() {
+      // TODO: позже вставим вашу структуру уровней/блайнды
+      return {
+        timer: { isRunning:false, isPaused:false, levelIndex:0, levelEndAt:null, pauseRemainingSec:null },
+        structure: {
+  levels: [
+    { min: 16, sb: 100,  bb: 100,   anteMode: "BB" },
+    { min: 16, sb: 100,  bb: 200,   anteMode: "BB" },
+    { min: 16, sb: 100,  bb: 300,   anteMode: "BB" },
+    { min: 16, sb: 200,  bb: 400,   anteMode: "BB" },
+    { min: 16, sb: 300,  bb: 600,   anteMode: "BB" },
+    { min: 16, sb: 400,  bb: 800,   anteMode: "BB" },
+
+    { min: 15, isBreak: true, label: "Break" },
+
+    { min: 16, sb: 500,  bb: 1000,  anteMode: "BB" },
+    { min: 16, sb: 600,  bb: 1200,  anteMode: "BB" },
+    { min: 16, sb: 800,  bb: 1600,  anteMode: "BB" },
+
+    { min: 14, sb: 1000, bb: 2000,  anteMode: "BB" },
+    { min: 14, sb: 1000, bb: 3000,  anteMode: "BB" },
+    { min: 14, sb: 2000, bb: 4000,  anteMode: "BB" },
+    { min: 14, sb: 2000, bb: 5000,  anteMode: "BB" },
+    { min: 14, sb: 3000, bb: 6000,  anteMode: "BB" },
+
+    { min: 12, sb: 4000, bb: 8000,  anteMode: "BB" },
+    { min: 12, sb: 5000, bb: 10000, anteMode: "BB" },
+
+    { min: 10, sb: 6000,  bb: 12000, anteMode: "BB" },
+    { min: 10, sb: 8000,  bb: 16000, anteMode: "BB" },
+    { min: 10, sb: 10000, bb: 20000, anteMode: "BB" },
+    { min: 10, sb: 15000, bb: 30000, anteMode: "BB" },
+    { min: 10, sb: 20000, bb: 40000, anteMode: "BB" },
+    { min: 10, sb: 30000, bb: 60000, anteMode: "BB" },
+
+    { min: 8, sb: 40000,  bb: 80000,  anteMode: "BB" },
+    { min: 8, sb: 50000,  bb: 100000, anteMode: "BB" },
+    { min: 8, sb: 60000,  bb: 120000, anteMode: "BB" },
+    { min: 8, sb: 75000,  bb: 150000, anteMode: "BB" },
+    { min: 8, sb: 100000, bb: 200000, anteMode: "BB" },
+    { min: 8, sb: 150000, bb: 300000, anteMode: "BB" }
+  ]
+},
+        stats: { S: 20000, E: 0, R: 0, N: 0 }
+      };
+    }
+
+    async function ensureRoom(roomId) {
+      const { data } = await sb.from('rooms').select('room_id').eq('room_id', roomId).maybeSingle();
+      if (!data) {
+        const { error } = await sb.from('rooms').insert({ room_id: roomId, state: defaultState() });
+        if (error) throw error;
+      }
+    }
+
+    document.getElementById('create').onclick = async () => {
+      const roomId = rid();
+      document.getElementById('room').value = roomId;
+      await ensureRoom(roomId);
+      document.getElementById('out').textContent =
+        `Создано: ${roomId}\nАдмин: admin.html?room=${encodeURIComponent(roomId)}\nЭкран: display.html?room=${encodeURIComponent(roomId)}`;
+    };
+
+    document.getElementById('openAdmin').onclick = async () => {
+      const roomId = rid(); document.getElementById('room').value = roomId;
+      await ensureRoom(roomId);
+      location.href = `admin.html?room=${encodeURIComponent(roomId)}`;
+    };
+
+    document.getElementById('openDisplay').onclick = async () => {
+      const roomId = rid(); document.getElementById('room').value = roomId;
+      await ensureRoom(roomId);
+      location.href = `display.html?room=${encodeURIComponent(roomId)}`;
+    };
+  </script>
+</body>
+</html>
