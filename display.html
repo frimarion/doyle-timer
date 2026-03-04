@@ -4,807 +4,219 @@
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>Doyle Timer — Display</title>
-
   <style>
     :root{
-      --bg0:#07070a;
-      --bg1:#0c0c12;
-      --card: rgba(255,255,255,.04);
-      --stroke: rgba(255,255,255,.10);
-      --stroke2: rgba(214,178,107,.22);
-      --text: rgba(243,243,246,.96);
-      --muted: rgba(243,243,246,.70);
-      --gold:#d6b26b;
-      --gold2:#f2d28a;
-      --danger:#ff6b6b;
-      --shadow: 0 18px 70px rgba(0,0,0,.60);
-      --radius: 22px;
-      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
-      --sans: system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      --bg0:#07070a;--bg1:#0c0c12;--card:rgba(255,255,255,.04);--stroke:rgba(255,255,255,.10);
+      --stroke2:rgba(214,178,107,.22);--text:rgba(243,243,246,.96);--muted:rgba(243,243,246,.70);
+      --gold:#d6b26b;--danger:#ff6b6b;--shadow:0 18px 70px rgba(0,0,0,.60);--radius:22px;
+      --mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono",monospace;
+      --sans:system-ui,-apple-system,Segoe UI,Roboto,Arial;
     }
-
-    html,body{ height:100%; }
-    body{
-      margin:0;
-      color:var(--text);
-      font-family: var(--sans);
-      background:
-        radial-gradient(1200px 700px at 50% 0%, rgba(214,178,107,.12), transparent 55%),
-        radial-gradient(900px 600px at 12% 20%, rgba(255,255,255,.06), transparent 55%),
-        radial-gradient(1100px 800px at 80% 90%, rgba(214,178,107,.08), transparent 60%),
-        linear-gradient(180deg, var(--bg0), var(--bg1));
-      overflow:hidden;
+    html,body{height:100%;}
+    body{margin:0;color:var(--text);font-family:var(--sans);overflow:hidden;
+      background:radial-gradient(1200px 700px at 50% 0%,rgba(214,178,107,.12),transparent 55%),
+        radial-gradient(900px 600px at 12% 20%,rgba(255,255,255,.06),transparent 55%),
+        radial-gradient(1100px 800px at 80% 90%,rgba(214,178,107,.08),transparent 60%),
+        linear-gradient(180deg,var(--bg0),var(--bg1));}
+    .wrap{width:min(1500px,calc(100vw - 48px));height:calc(100vh - 24px);margin:12px auto;display:flex;flex-direction:column;gap:8px;box-sizing:border-box;}
+    header.top{position:relative;display:flex;align-items:center;justify-content:center;flex:0 0 auto;min-height:64px;}
+    .brand img{width:clamp(260px,28vw,480px);height:auto;display:block;filter:drop-shadow(0 0 14px rgba(214,178,107,.40)) drop-shadow(0 0 34px rgba(214,178,107,.20));}
+    .room{position:absolute;right:0;top:50%;transform:translateY(-50%);color:var(--muted);font-size:12px;letter-spacing:.10em;text-transform:uppercase;border:1px solid var(--stroke);background:rgba(255,255,255,.03);padding:8px 12px;border-radius:999px;white-space:nowrap;max-width:30vw;overflow:hidden;text-overflow:ellipsis;}
+    main.grid{flex:1 1 auto;display:grid;grid-template-columns:minmax(320px,400px) minmax(0,1fr) minmax(260px,320px);gap:12px;min-height:0;}
+    main.grid.noRating{grid-template-columns:minmax(0,1fr) minmax(260px,320px);}
+    main.grid.noRating .maincard{justify-self:center;width:min(980px,100%);}
+    .card{background:var(--card);border:1px solid var(--stroke);border-radius:var(--radius);box-shadow:var(--shadow);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);min-height:0;}
+    .hidden{display:none !important;}
+    .maincard{padding:18px 18px 16px;display:flex;flex-direction:column;justify-content:flex-start;gap:10px;position:relative;overflow:hidden;min-width:0;}
+    .maincard::before{content:"";position:absolute;inset:-2px;border-radius:var(--radius);background:radial-gradient(900px 400px at 20% 0%,rgba(242,210,138,.10),transparent 55%);pointer-events:none;}
+    .levelTop{display:flex;align-items:center;justify-content:space-between;gap:10px;position:relative;z-index:1;}
+    .level{font-size:clamp(52px,3.3vw,76px);font-weight:950;letter-spacing:.05em;color:rgba(242,210,138,.95);text-shadow:0 14px 50px rgba(0,0,0,.60),0 0 22px rgba(214,178,107,.22);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:70%;}
+    .status{font-size:12px;letter-spacing:.16em;text-transform:uppercase;padding:9px 12px;border-radius:999px;border:1px solid var(--stroke2);color:rgba(243,243,246,.86);background:radial-gradient(120% 180% at 20% 0%,rgba(242,210,138,.16),transparent 55%),linear-gradient(180deg,rgba(214,178,107,.18),rgba(214,178,107,.08));white-space:nowrap;position:relative;z-index:1;}
+    .blindsSub{position:relative;z-index:1;text-align:center;color:rgba(243,243,246,.75);font-size:14px;letter-spacing:.16em;text-transform:uppercase;margin-top:2px;}
+    .blindsBox{position:relative;z-index:1;text-align:center;padding:14px 12px 12px;border-radius:18px;border:1px solid rgba(214,178,107,.18);background:radial-gradient(1000px 240px at 50% 0%,rgba(214,178,107,.12),transparent 60%);min-width:0;}
+    .blindsMain{font-size:172px;font-weight:950;letter-spacing:.02em;line-height:1;color:rgba(243,243,246,.98);text-shadow:0 18px 60px rgba(0,0,0,.70),0 0 28px rgba(214,178,107,.22);white-space:nowrap;overflow:hidden;max-width:100%;}
+    .grid.hasRating .blindsMain{font-size:148px;}
+    .anteLine{margin-top:10px;font-size:clamp(28px,2.6vw,44px);font-weight:900;letter-spacing:.02em;color:rgba(243,243,246,.88);opacity:.92;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .anteLine .gold{color:rgba(242,210,138,.95);}
+    .timeRow{position:relative;z-index:1;display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap;margin-top:2px;}
+    .time{font-size:clamp(64px,4.8vw,110px);font-weight:950;}
+    .pill{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);border:1px solid var(--stroke);border-radius:999px;padding:9px 11px;background:rgba(0,0,0,.18);white-space:nowrap;text-align:center;}
+    .nextBox{position:relative;z-index:1;display:flex;justify-content:center;margin-top:2px;}
+    .next{font-size:clamp(24px,2vw,38px);font-weight:950;padding:13px 22px;border-radius:999px;border:1px solid rgba(214,178,107,.18);background:rgba(0,0,0,.14);box-shadow:0 12px 50px rgba(0,0,0,.40);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;}
+    .next b{font-size:1.15em;color:rgba(242,210,138,.95);text-shadow:0 0 22px rgba(214,178,107,.18);}
+    /* RIGHT SIDE */
+    .sidecard{padding:16px 16px 14px;display:flex;flex-direction:column;min-width:0;}
+    .sideTitle{font-size:22px;font-weight:900;letter-spacing:.05em;color:rgba(242,210,138,.90);text-shadow:0 0 18px rgba(214,178,107,.20);margin-bottom:4px;}
+    .statRow{display:flex;flex-direction:column;padding:14px 18px;border-radius:16px;background:rgba(0,0,0,.22);border:1px solid rgba(255,255,255,.09);margin-top:10px;gap:4px;}
+    .statRow:first-of-type{margin-top:12px;}
+    .statLabel{font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:rgba(243,243,246,.55);font-weight:700;}
+    .statValue{font-size:clamp(26px,2.2vw,36px);font-weight:950;color:rgba(243,243,246,.97);letter-spacing:.02em;line-height:1.1;}
+    .statValue.gold{color:rgba(242,210,138,.97);text-shadow:0 0 18px rgba(214,178,107,.22);}
+    /* RATING */
+    .ratingcard{padding:14px 14px 12px;display:flex;flex-direction:column;min-width:0;}
+    #ratingMeta{display:none !important;}
+    .sideTitleHero{font-size:clamp(32px,2.4vw,48px);font-weight:950;letter-spacing:.05em;color:rgba(242,210,138,.95);text-shadow:0 14px 50px rgba(0,0,0,.60),0 0 22px rgba(214,178,107,.22);margin-bottom:2px;}
+    .ratingGridWrap{width:100%;flex:1 1 auto;overflow:hidden;}
+    .ratingGridHead{display:grid;grid-template-columns:44px 1fr 44px 1fr;gap:8px 12px;padding:8px 12px;border-bottom:1px solid rgba(255,255,255,.07);color:rgba(255,255,255,.60);font-weight:700;letter-spacing:.02em;font-size:16px;}
+    .ratingGrid{display:grid;grid-template-columns:44px 1fr 44px 1fr;gap:6px 10px;padding:10px 12px 12px;align-content:start;overflow:hidden;}
+    .rCellPlace,.rCellPts{font-size:20px;line-height:1.2;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.06);}
+    .rCellPlace{font-weight:800;color:rgba(255,255,255,.92);}
+    .rCellPts{text-align:right;font-weight:900;color:rgba(255,255,255,.92);font-variant-numeric:tabular-nums;}
+    .rGold{color:rgba(242,210,138,.98) !important;text-shadow:0 0 14px rgba(214,178,107,.20);}
+    .rSilver{color:rgba(210,214,220,.98) !important;text-shadow:0 0 12px rgba(255,255,255,.10);}
+    .rBronze{color:rgba(214,140,90,.98) !important;text-shadow:0 0 12px rgba(214,140,90,.14);}
+    .err{margin-top:4px;color:#ff9b9b;font-size:14px;opacity:.95;min-height:18px;}
+    @media(max-width:980px){
+      main.grid{grid-template-columns:1fr;}
+      .ratingcard{order:3;}.maincard{order:1;}.sidecard{order:2;}
+      .room{max-width:40vw;font-size:10px;}
     }
-
-    .wrap{
-      width: min(1500px, calc(100vw - 48px));
-      height: calc(100vh - 24px);
-      margin: 12px auto;
-      display:flex;
-      flex-direction:column;
-      gap: 8px;
-      box-sizing:border-box;
-    }
-
-    header.top{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap: 12px;
-      flex: 0 0 auto;
-    }
-
-    .brand img{
-      width: clamp(320px, 32vw, 560px);
-      height:auto;
-      display:block;
-      filter:
-        drop-shadow(0 0 14px rgba(214,178,107,.40))
-        drop-shadow(0 0 34px rgba(214,178,107,.20));
-    }
-
-    .room{
-      color: var(--muted);
-      font-size: 13px;
-      letter-spacing: .10em;
-      text-transform: uppercase;
-      border: 1px solid var(--stroke);
-      background: rgba(255,255,255,.03);
-      padding: 10px 12px;
-      border-radius: 999px;
-      box-shadow: 0 10px 35px rgba(0,0,0,.35);
-      white-space: nowrap;
-      max-width: 45vw;
-      overflow:hidden;
-      text-overflow: ellipsis;
-    }
-
-    main.grid{
-      flex: 1 1 auto;
-      display:grid;
-      grid-template-columns: minmax(280px, 360px) minmax(0, 1fr) minmax(280px, 360px);
-      gap: 12px;
-      min-height: 0;
-    }
-
-    /* When rating is OFF: make main big + centered, keep right stats */
-    main.grid.noRating{
-      grid-template-columns: minmax(0, 1fr) minmax(280px, 360px);
-    }
-    main.grid.noRating .maincard{
-      justify-self: center;
-      width: min(980px, 100%);
-    }
-
-    .card{
-      background: var(--card);
-      border: 1px solid var(--stroke);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      min-height: 0;
-    }
-
-    .hidden{ display:none !important; }
-
-
-    /* MAIN */
-    .maincard{
-      padding: 18px 18px 16px;
-      display:flex;
-      flex-direction:column;
-      justify-content:center;
-      gap: 12px;
-      position: relative;
-      overflow:hidden;
-      min-width: 0;
-    }
-    .maincard::before{
-      content:"";
-      position:absolute;
-      inset:-2px;
-      border-radius: var(--radius);
-      background: radial-gradient(900px 400px at 20% 0%, rgba(242,210,138,.10), transparent 55%);
-      pointer-events:none;
-    }
-
-    .levelTop{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap: 10px;
-      position:relative;
-      z-index:1;
-    }
-
-    /* bigger LEVEL */
-    .level{
-      font-size: clamp(52px, 3.3vw, 76px);
-      font-weight: 950;
-      letter-spacing: .05em;
-      color: rgba(242,210,138,.95);
-      text-shadow:
-        0 14px 50px rgba(0,0,0,.60),
-        0 0 22px rgba(214,178,107,.22);
-      white-space: nowrap;
-      overflow:hidden;
-      text-overflow: ellipsis;
-      max-width: 70%;
-    }
-
-    .status{
-      font-size: 12px;
-      letter-spacing: .16em;
-      text-transform: uppercase;
-      padding: 9px 12px;
-      border-radius: 999px;
-      border: 1px solid var(--stroke2);
-      color: rgba(243,243,246,.86);
-      background:
-        radial-gradient(120% 180% at 20% 0%, rgba(242,210,138,.16), transparent 55%),
-        linear-gradient(180deg, rgba(214,178,107,.18), rgba(214,178,107,.08));
-      white-space: nowrap;
-      position:relative;
-      z-index:1;
-    }
-
-    .blindsSub{
-      position:relative;
-      z-index:1;
-      text-align:center;
-      color: rgba(243,243,246,.75);
-      font-size: 14px;
-      letter-spacing: .16em;
-      text-transform: uppercase;
-      margin-top: 2px;
-    }
-
-    .blindsBox{
-      position:relative;
-      z-index:1;
-      text-align:center;
-      padding: 14px 12px 12px;
-      border-radius: 18px;
-      border: 1px solid rgba(214,178,107,.18);
-      background: radial-gradient(1000px 240px at 50% 0%, rgba(214,178,107,.12), transparent 60%);
-      min-width: 0;
-    }
-
-    /* glow on blinds */
-    .blindsMain{
-      font-size: 172px; /* will be auto-fit by JS */
-      font-weight: 950;
-      letter-spacing: .02em;
-      line-height: 1;
-      color: rgba(243,243,246,.98);
-      text-shadow:
-        0 18px 60px rgba(0,0,0,.70),
-        0 0 28px rgba(214,178,107,.22);
-      white-space: nowrap;
-      overflow: hidden;
-      max-width: 100%;
-    }
-
-    .grid.hasRating .blindsMain{
-      font-size: 148px; /* will be auto-fit by JS */
-    }
-
-    .anteLine{
-      margin-top: 10px;
-      font-size: clamp(28px, 2.6vw, 44px);
-      font-weight: 900;
-      letter-spacing: .02em;
-      color: rgba(243,243,246,.88);
-      opacity: .92;
-      white-space: nowrap;
-      overflow:hidden;
-      text-overflow: ellipsis;
-    }
-    .anteLine .gold{ color: rgba(242,210,138,.95); }
-
-    .timeRow{
-      position:relative;
-      z-index:1;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      gap: 14px;
-      flex-wrap:wrap;
-      margin-top: 2px;
-    }
-
-    .time{
-      font-size: clamp(64px, 4.8vw, 110px);
-      font-weight: 950;
-    }
-
-    .pill{
-      font-size: 12px;
-      letter-spacing: .12em;
-      text-transform: uppercase;
-      color: var(--muted);
-      border: 1px solid var(--stroke);
-      border-radius: 999px;
-      padding: 9px 11px;
-      background: rgba(0,0,0,.18);
-      white-space: nowrap;
-      text-align:center;
-    }
-
-    .nextBox{
-      position:relative;
-      z-index:1;
-      display:flex;
-      justify-content:center;
-      margin-top: 2px;
-    }
-
-    /* bigger NEXT */
-    .next{
-      font-size: clamp(30px, 2.3vw, 44px);
-      font-weight: 950;
-      padding: 18px 24px;
-      border-radius: 999px;
-      border: 1px solid rgba(214,178,107,.18);
-      background: rgba(0,0,0,.14);
-      box-shadow: 0 12px 50px rgba(0,0,0,.40);
-      white-space: nowrap;
-      overflow:hidden;
-      text-overflow: ellipsis;
-      max-width: 100%;
-    }
-    .next b{
-      font-size: 1.15em;
-      color: rgba(242,210,138,.95);
-      text-shadow: 0 0 22px rgba(214,178,107,.18);
-    }
-
-    /* SIDE */
-    .sidecard{
-      padding: 14px 14px 12px;
-      display:flex;
-      flex-direction:column;
-      min-width: 0;
-      max-width: 380px;
-    }
-
-    .sideTitle{ font-size: 20px; }
-    .stats{ font-size: 22px; }
-
-    .row{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      padding: 14px 22px;
-      border-radius: 16px;
-      background: rgba(0,0,0,.18);
-      border: 1px solid rgba(255,255,255,.08);
-      gap: 18px;
-      margin-top: 10px;
-    }
-    .row:first-child{ margin-top: 12px; }
-
-    .row span{ flex: 1; }
-    .row b{ min-width: 140px; text-align:right; }
-
-    /* add spacing specifically between "В игре" and its value */
-    .row.play span{ margin-right: 10px; }
-
-    .err{
-      margin-top: 4px;
-      color: #ff9b9b;
-      font-size: 14px;
-      opacity: .95;
-      min-height: 18px;
-    }
-
-    @media (max-width: 980px){
-      main.grid{ grid-template-columns: 1fr; }
-      .ratingcard{ order: 3; }
-      .maincard{ order: 1; }
-      .sidecard{ order: 2; }
-      .sidecard{ max-width: none; }
-      .room{ max-width: 60vw; }
-    }
-  
-
-    /* Rating column tweaks */
-    #ratingMeta{ display:none !important; }
-
-    .ratingcard .sideTitle{ margin-bottom: 8px; }
-
-    .ratingcard .levelsTable{
-      width:100%;
-      border-collapse: collapse;
-      font-size: 22px; /* match right column */
-    }
-    .ratingcard .levelsTable thead th{
-      font-size: 18px;
-      color: var(--muted);
-      font-weight: 700;
-      padding: 10px 10px;
-      text-align: left;
-      border-bottom: 1px solid rgba(255,255,255,.10);
-    }
-    .ratingcard .levelsTable tbody td{
-      padding: 10px 10px;
-      border-bottom: 1px solid rgba(255,255,255,.06);
-      font-weight: 850;
-    }
-    .ratingcard .levelsTable tbody td:nth-child(1){
-      width: 64px;
-      text-align: left;
-    }
-    .ratingcard .levelsTable tbody td:nth-child(2){
-      text-align: right;
-    }
-
-    /* Medal colors for top 3 */
-    .ratingcard .levelsTable tbody tr:nth-child(1) td{ color: var(--gold2); text-shadow: 0 0 18px rgba(242,210,138,.25); }
-    .ratingcard .levelsTable tbody tr:nth-child(2) td{ color: rgba(232,238,248,.92); text-shadow: 0 0 16px rgba(255,255,255,.18); }
-    .ratingcard .levelsTable tbody tr:nth-child(3) td{ color: rgba(205,140,92,.98); text-shadow: 0 0 16px rgba(205,140,92,.18); }
-
-    .sideTitleHero{
-      font-size: clamp(34px, 2.3vw, 48px);
-      font-weight: 950;
-      letter-spacing: .05em;
-      color: rgba(242,210,138,.95);
-      text-shadow:
-        0 14px 50px rgba(0,0,0,.60),
-        0 0 22px rgba(214,178,107,.22);
-      margin-bottom: 2px;
-    }
-
-    .ratingGridWrap{ width:100%; }
-    .ratingGridHead{
-      display:grid;
-      grid-template-columns: 56px 1fr 56px 1fr;
-      gap: 10px 14px;
-      padding: 10px 14px;
-      border-bottom: 1px solid rgba(255,255,255,.07);
-      color: rgba(255,255,255,.70);
-      font-weight: 700;
-      letter-spacing: .02em;
-      font-size: 16px;
-    }
-    .ratingGrid{
-      display:grid;
-      grid-template-columns: 56px 1fr 56px 1fr;
-      gap: 10px 14px;
-      padding: 12px 14px 14px;
-      align-content:start;
-      overflow:hidden;
-    }
-    .rCellPlace, .rCellPts{
-      font-size: 18px;
-      line-height: 1.2;
-      padding: 7px 0;
-      border-bottom: 1px solid rgba(255,255,255,.06);
-    }
-    .rCellPlace{
-      font-weight: 800;
-      color: rgba(255,255,255,.92);
-    }
-    .rCellPts{
-      text-align:right;
-      font-weight: 900;
-      color: rgba(255,255,255,.92);
-    }
-    .rGold{ color: rgba(242,210,138,.98) !important; text-shadow: 0 0 14px rgba(214,178,107,.20); }
-    .rSilver{ color: rgba(210,214,220,.98) !important; text-shadow: 0 0 12px rgba(255,255,255,.10); }
-    .rBronze{ color: rgba(214,140,90,.98) !important; text-shadow: 0 0 12px rgba(214,140,90,.14); }
-
   </style>
 </head>
-
 <body>
   <div class="wrap">
     <header class="top">
-      <div class="brand">
-        <img src="logo.png" alt="Doyle Logo">
-      </div>
+      <div class="brand"><img src="logo.png" alt="Doyle Logo"></div>
       <div class="room" id="roomTag"></div>
     </header>
-
     <main class="grid noRating">
       <aside class="card ratingcard hidden" id="ratingCard">
-        <div class="sideTitle sideTitleHero">Рейтинг</div>
-        <div class="ratingGridWrap" style="margin-top:12px;">
-          <div class="ratingGridHead">
-            <div>Место</div><div>Очки</div><div>Место</div><div>Очки</div>
-          </div>
+        <div class="sideTitleHero">Рейтинг</div>
+        <div id="ratingMeta"></div>
+        <div class="ratingGridWrap" style="margin-top:10px;">
+          <div class="ratingGridHead"><div>Место</div><div style="text-align:right">Очки</div><div>Место</div><div style="text-align:right">Очки</div></div>
           <div class="ratingGrid" id="ratingGrid"></div>
         </div>
       </aside>
-
       <section class="card maincard">
         <div class="levelTop">
           <div id="level" class="level">Level</div>
           <div id="status" class="status">—</div>
         </div>
-
         <div class="blindsSub" id="blindsLabel">Current blinds</div>
-
         <div class="blindsBox">
           <div id="blindsMain" class="blindsMain">—</div>
           <div id="anteLine" class="anteLine"></div>
         </div>
-
         <div class="timeRow">
           <div id="time" class="time">--:--</div>
-          <div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:center;">
+          <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;">
             <div class="pill" id="durationPill">—</div>
           </div>
         </div>
-
-        <div class="nextBox">
-          <div id="next" class="next">Next: —</div>
-        </div>
+        <div class="nextBox"><div id="next" class="next">Next: —</div></div>
       </section>
-
       <aside class="card sidecard">
         <div class="sideTitle">Турнир</div>
-        <div id="stats" class="stats"></div>
+        <div id="stats"></div>
       </aside>
     </main>
-
     <div id="err" class="err"></div>
   </div>
-
   <script src="config.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
   <script>
-    const NF = new Intl.NumberFormat('ru-RU');
-
-    const sb = supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
-    const roomId = (new URLSearchParams(location.search).get('room') || '').trim();
-    document.getElementById('roomTag').textContent = roomId ? `room: ${roomId}` : '';
-
-    let state = null;
-    let lastSig = "";
-
-    function clampInt(x,min=0){ x = parseInt(x ?? 0, 10); return Number.isFinite(x) ? Math.max(min,x) : min; }
-    function fmtInt(n){ return NF.format(clampInt(n,0)); }
-
-    function fitToWidth(el, maxPx, minPx){
-      if (!el) return;
-      const max = Math.max(1, Math.floor(maxPx));
-      const min = Math.max(1, Math.floor(minPx));
-      el.style.fontSize = max + 'px';
-      // force layout
-      el.getBoundingClientRect();
-      for (let sz = max; sz >= min; sz -= 2){
-        el.style.fontSize = sz + 'px';
-        if (el.scrollWidth <= el.clientWidth + 1) break;
-      }
-    }
-
-    function nowMs(){ return Date.now(); }
-
+    const NF=new Intl.NumberFormat('ru-RU');
+    const sb=supabase.createClient(window.SUPABASE_URL,window.SUPABASE_ANON_KEY);
+    const roomId=(new URLSearchParams(location.search).get('room')||'').trim();
+    document.getElementById('roomTag').textContent=roomId?`room: ${roomId}`:'';
+    let state=null,lastSig="",pollInFlight=false,lastBlindsText="",lastHasRating=false;
+    function clampInt(x,min=0){x=parseInt(x??0,10);return Number.isFinite(x)?Math.max(min,x):min;}
+    function fmtInt(n){return NF.format(clampInt(n,0));}
+    function nowMs(){return Date.now();}
+    function fitToWidth(el,maxPx,minPx){if(!el)return;const max=Math.max(1,Math.floor(maxPx)),min=Math.max(1,Math.floor(minPx));el.style.fontSize=max+'px';el.getBoundingClientRect();for(let sz=max;sz>=min;sz-=2){el.style.fontSize=sz+'px';if(el.scrollWidth<=el.clientWidth+1)break;}}
     function normalizeState(st){
-      if (!st) return null;
-
-      // old format stats {S,E,R,N} -> new format
-      if (st.stats && (st.stats.S !== undefined || st.stats.E !== undefined)) {
-        st.tournament = st.tournament || { createdAt: new Date().toISOString(), startStack: st.stats.S || 0 };
-        st.stats = {
-          registered: st.stats.N ?? 0,
-          alive: st.stats.N ?? 0,
-          reentries: st.stats.R ?? 0
-        };
-      }
-
-      st.tournament = st.tournament || { createdAt: new Date().toISOString(), startStack: 0 };
-      st.stats = st.stats || { registered:0, alive:0, reentries:0 };
-      st.structure = st.structure || { levels: [] };
-      st.timer = st.timer || { isRunning:false, isPaused:false, levelIndex:0, levelEndAt:null, pauseRemainingSec:null };
-
-      // normalize ints
-      st.tournament.startStack = clampInt(st.tournament.startStack,0);
-      st.stats.registered = clampInt(st.stats.registered,0);
-      st.stats.alive = clampInt(st.stats.alive,0);
-      st.stats.reentries = clampInt(st.stats.reentries,0);
-      st.stats.alive = Math.min(st.stats.alive, st.stats.registered);
-
-      // normalize levels
-      if (!Array.isArray(st.structure.levels)) st.structure.levels = [];
-      st.structure.levels = st.structure.levels.map(l => {
-        const x = { ...l };
-        x.isBreak = !!x.isBreak;
-        x.label = (x.label ?? "").toString();
-        x.min = clampInt(x.min,0);
-        x.sb = clampInt(x.sb,0);
-        x.bb = clampInt(x.bb,0);
-        x.anteMode = (x.anteMode === "BB") ? "BB" : "NONE";
-        return x;
-      });
-
-      st.timer.levelIndex = clampInt(st.timer.levelIndex,0);
-      if (st.structure.levels.length){
-        st.timer.levelIndex = Math.min(st.timer.levelIndex, st.structure.levels.length - 1);
-      } else {
-        st.timer.levelIndex = 0;
-      }
-
+      if(!st)return null;
+      if(st.stats&&(st.stats.S!==undefined||st.stats.E!==undefined)){st.tournament=st.tournament||{createdAt:new Date().toISOString(),startStack:st.stats.S||0};st.stats={registered:st.stats.N??0,alive:st.stats.N??0,reentries:st.stats.R??0};}
+      st.tournament=st.tournament||{createdAt:new Date().toISOString(),startStack:0};
+      st.stats=st.stats||{registered:0,alive:0,reentries:0,busted:0};
+      st.structure=st.structure||{levels:[]};
+      st.timer=st.timer||{isRunning:false,isPaused:false,levelIndex:0,levelEndAt:null,pauseRemainingSec:null};
+      st.tournament.startStack=clampInt(st.tournament.startStack,0);
+      st.stats.registered=clampInt(st.stats.registered,0);
+      st.stats.reentries=clampInt(st.stats.reentries,0);
+      if(st.stats.busted!=null){st.stats.busted=clampInt(st.stats.busted,0);st.stats.busted=Math.min(st.stats.busted,st.stats.registered);st.stats.alive=Math.max(0,st.stats.registered-st.stats.busted);}
+      else{st.stats.alive=Math.min(clampInt(st.stats.alive,0),st.stats.registered);}
+      if(st.timer.levelEndAt!=null){const ts=Number(st.timer.levelEndAt);if(!Number.isFinite(ts)||ts<1000000000000||ts>nowMs()+86400000){st.timer.levelEndAt=null;st.timer.isRunning=false;}}
+      if(!Array.isArray(st.structure.levels))st.structure.levels=[];
+      st.structure.levels=st.structure.levels.map(l=>{const x={...l};x.isBreak=!!x.isBreak;x.label=(x.label??"").toString();x.min=clampInt(x.min,0);x.sb=clampInt(x.sb,0);x.bb=clampInt(x.bb,0);x.anteMode=(x.anteMode==="BB")?"BB":"NONE";return x;});
+      st.timer.levelIndex=clampInt(st.timer.levelIndex,0);
+      if(st.structure.levels.length)st.timer.levelIndex=Math.min(st.timer.levelIndex,st.structure.levels.length-1);
+      else st.timer.levelIndex=0;
       return st;
     }
-
-    function fmtTime(sec){
-      sec = Math.max(0, sec|0);
-      const m = Math.floor(sec/60), s = sec%60;
-      return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-    }
-
-    function calcEntries(){
-      const reg = state?.stats?.registered ?? 0;
-      const re = state?.stats?.reentries ?? 0;
-      return clampInt(reg,0) + clampInt(re,0);
-    }
-
-    function calcAvg(){
-      const reg = clampInt(state?.stats?.registered ?? 0, 0);
-      const re  = clampInt(state?.stats?.reentries ?? 0, 0);
-      const entries = reg + re;
-      const alive = clampInt(state?.stats?.alive ?? 0, 0);
-      const startStack = clampInt(state?.tournament?.startStack ?? 0, 0);
-      const total = entries * startStack;
-      const avg = (alive > 0) ? Math.floor(total / alive) : 0;
-      return Number.isFinite(avg) ? avg : 0;
-    }
-
-    function getLevel(){
-      const idx = state?.timer?.levelIndex ?? 0;
-      return (state?.structure?.levels?.[idx]) || { min: 0, sb: 0, bb: 0, anteMode: "NONE" };
-    }
-
-    function remainingSec(){
-      const ti = state?.timer;
-      if (!ti?.isRunning) return null;
-      if (ti.isPaused) return ti.pauseRemainingSec ?? null;
-      if (!ti.levelEndAt) return null;
-      return Math.max(0, Math.floor((ti.levelEndAt - nowMs())/1000));
-    }
-
-    
-    // ===== rating (left column)
+    function fmtTime(sec){sec=Math.max(0,sec|0);const m=Math.floor(sec/60),s=sec%60;return`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;}
+    function calcEntries(){return clampInt(state?.stats?.registered??0,0)+clampInt(state?.stats?.reentries??0,0);}
+    function calcAvg(){const reg=clampInt(state?.stats?.registered??0,0),re=clampInt(state?.stats?.reentries??0,0),alive=clampInt(state?.stats?.alive??0,0),ss=clampInt(state?.tournament?.startStack??0,0);const avg=alive>0?Math.floor((reg+re)*ss/alive):0;return Number.isFinite(avg)?avg:0;}
+    function calcTotalChips(){const reg=clampInt(state?.stats?.registered??0,0),re=clampInt(state?.stats?.reentries??0,0),ss=clampInt(state?.tournament?.startStack??0,0);return(reg+re)*ss;}
+    function getLevel(){return(state?.structure?.levels?.[state?.timer?.levelIndex??0])||{min:0,sb:0,bb:0,anteMode:"NONE"};}
+    function remainingSec(){const ti=state?.timer;if(!ti?.isRunning)return null;if(ti.isPaused)return ti.pauseRemainingSec??null;if(!ti.levelEndAt)return null;return Math.max(0,Math.floor((ti.levelEndAt-nowMs())/1000));}
     function renderRating(){
-      const card = document.getElementById("ratingCard");
-      const gridEl = document.getElementById("ratingGrid");
-      if (!card || !gridEl) return;
-
-      const mainGrid = document.querySelector('main.grid');
-
-      const r = state?.rating;
-      const active = !!r?.isActive && Array.isArray(r?.payouts) && r.payouts.length > 0;
-
-      if (!active){
-        card.classList.add("hidden");
-        mainGrid?.classList.add('noRating');
-        mainGrid?.classList.remove('hasRating');
-        gridEl.innerHTML = "";
-        return;
-      }
-
-      card.classList.remove("hidden");
-      mainGrid?.classList.remove('noRating');
-      mainGrid?.classList.add('hasRating');
-
-      const payouts = r.payouts.map(x => Number(x) || 0);
-      const P = payouts.length;
-      const rows = Math.ceil(P / 2);
-
-      // Build 4-column grid: (place, pts, place, pts)
-      const frag = document.createDocumentFragment();
-
-      const medalClass = (place) => place===1 ? "rGold" : place===2 ? "rSilver" : place===3 ? "rBronze" : "";
-
-      for (let row=0; row<rows; row++){
-        const i1 = row;
-        const i2 = row + rows;
-
-        // left pair
-        if (i1 < P){
-          const place = i1 + 1;
-          const pl = document.createElement("div");
-          pl.className = "rCellPlace " + medalClass(place);
-          pl.textContent = String(place);
-
-          const pts = document.createElement("div");
-          pts.className = "rCellPts " + medalClass(place);
-          pts.textContent = fmtInt(payouts[i1]);
-
-          frag.appendChild(pl);
-          frag.appendChild(pts);
-        } else {
-          frag.appendChild(document.createElement("div"));
-          frag.appendChild(document.createElement("div"));
-        }
-
-        // right pair
-        if (i2 < P){
-          const place = i2 + 1;
-          const pl = document.createElement("div");
-          pl.className = "rCellPlace " + medalClass(place);
-          pl.textContent = String(place);
-
-          const pts = document.createElement("div");
-          pts.className = "rCellPts " + medalClass(place);
-          pts.textContent = fmtInt(payouts[i2]);
-
-          frag.appendChild(pl);
-          frag.appendChild(pts);
-        } else {
-          frag.appendChild(document.createElement("div"));
-          frag.appendChild(document.createElement("div"));
-        }
-      }
-
-      gridEl.innerHTML = "";
-      gridEl.appendChild(frag);
+      const card=document.getElementById("ratingCard"),gridEl=document.getElementById("ratingGrid");if(!card||!gridEl)return;
+      const mainGrid=document.querySelector('main.grid'),r=state?.rating,active=!!r?.isActive&&Array.isArray(r?.payouts)&&r.payouts.length>0;
+      if(!active){const wasActive=!mainGrid?.classList.contains('noRating');card.classList.add("hidden");mainGrid?.classList.add('noRating');mainGrid?.classList.remove('hasRating');gridEl.innerHTML="";if(wasActive){lastBlindsText="";}return;}
+      const wasInactive=mainGrid?.classList.contains('noRating');card.classList.remove("hidden");mainGrid?.classList.remove('noRating');mainGrid?.classList.add('hasRating');if(wasInactive){lastBlindsText="";}
+      const payouts=r.payouts.map(x=>Number(x)||0),P=payouts.length,rows=Math.ceil(P/2);
+      const frag=document.createDocumentFragment(),mc=(p)=>p===1?"rGold":p===2?"rSilver":p===3?"rBronze":"";
+      for(let row=0;row<rows;row++){for(const idx of[row,row+rows]){if(idx<P){const place=idx+1,pl=document.createElement("div"),pts=document.createElement("div");pl.className="rCellPlace "+mc(place);pl.textContent=String(place);pts.className="rCellPts "+mc(place);pts.textContent=fmtInt(payouts[idx]);frag.appendChild(pl);frag.appendChild(pts);}else{frag.appendChild(document.createElement("div"));frag.appendChild(document.createElement("div"));}}}
+      gridEl.innerHTML="";gridEl.appendChild(frag);
     }
-
-function render(){
-      if (!state) return;
+    function statRow(label,value,gold=false){return`<div class="statRow"><div class="statLabel">${label}</div><div class="statValue${gold?' gold':''}">${value}</div></div>`;}
+    function render(){
+      if(!state)return;
       renderRating();
-
-      const lv = getLevel();
-      const nextLv = state.structure.levels[state.timer.levelIndex + 1];
-
-      // header + status
-      const playNo = (()=>{
-        const idx = state?.timer?.levelIndex ?? 0;
-        let n = 0;
-        for (let i=0;i<=idx;i++) if (!state.structure.levels[i]?.isBreak) n++;
-        return Math.max(1,n);
-      })();
-
-      document.getElementById('level').textContent =
-        lv.isBreak ? (lv.label || 'Перерыв') : `Level ${playNo}`;
-
-      const ti = state.timer;
-      document.getElementById('status').textContent =
-        !ti.isRunning ? 'STOPPED' : (ti.isPaused ? 'PAUSED' : 'RUNNING');
-
-      // blinds + ante
-      const blindsLabel = document.getElementById('blindsLabel');
-      const blindsMain = document.getElementById('blindsMain');
-      const anteLine = document.getElementById('anteLine');
-
-      if (lv.isBreak){
-        blindsLabel.textContent = 'Break';
-        blindsMain.textContent = '—';
-        anteLine.textContent = '';
-      } else {
-        blindsLabel.textContent = 'Current blinds';
-        blindsMain.textContent = `${lv.sb} / ${lv.bb}`;
-
-        // Auto-fit big blinds into the available width (especially when the rating column is visible).
-        const hasRating = !!(state?.rating?.isActive && Array.isArray(state?.rating?.payouts) && state.rating.payouts.length);
-        fitToWidth(blindsMain, hasRating ? 148 : 172, hasRating ? 56 : 64);
-
-        if (lv.anteMode === "BB"){
-          anteLine.innerHTML = `<span class="gold">BB Ante</span> ${lv.bb}`;
-        } else {
-          anteLine.textContent = '';
-        }
+      const lv=getLevel(),nextLv=state.structure.levels[state.timer.levelIndex+1];
+      const playNo=(()=>{const idx=state?.timer?.levelIndex??0;let n=0;for(let i=0;i<=idx;i++)if(!state.structure.levels[i]?.isBreak)n++;return Math.max(1,n);})();
+      document.getElementById('level').textContent=lv.isBreak?(lv.label||'Перерыв'):`Level ${playNo}`;
+      const ti=state.timer;
+      document.getElementById('status').textContent=!ti.isRunning?'STOPPED':(ti.isPaused?'PAUSED':'RUNNING');
+      const blindsLabel=document.getElementById('blindsLabel'),blindsMain=document.getElementById('blindsMain'),anteLine=document.getElementById('anteLine');
+      if(lv.isBreak){blindsLabel.textContent='Break';if(lastBlindsText!=='—'){blindsMain.textContent='—';lastBlindsText='—';}anteLine.textContent='';}
+      else{
+        blindsLabel.textContent='Current blinds';
+        const newBlindsText=`${lv.sb} / ${lv.bb}`;
+        if(newBlindsText!==lastBlindsText){blindsMain.textContent=newBlindsText;lastBlindsText=newBlindsText;const hasRating=!!(state?.rating?.isActive&&Array.isArray(state?.rating?.payouts)&&state.rating.payouts.length);fitToWidth(blindsMain,hasRating?148:172,hasRating?56:64);}
+        if(lv.anteMode==="BB")anteLine.innerHTML=`<span class="gold">BB Ante</span> ${lv.bb}`;else anteLine.textContent='';
       }
-
-      // time
-      const rem = remainingSec();
-      const timeEl = document.getElementById('time');
-      timeEl.textContent = rem===null ? '--:--' : fmtTime(rem);
-
-      document.getElementById('durationPill').textContent = lv.min ? `${lv.min} min` : '—';
-
-      if (rem !== null && rem <= 60){
-        timeEl.style.color = "#ff6b6b";
-        timeEl.style.textShadow = "0 0 44px rgba(255,80,80,.55)";
-      } else {
-        timeEl.style.color = "";
-        timeEl.style.textShadow = "";
-      }
-
-      // next
-      const nextEl = document.getElementById('next');
-      if (nextLv){
-        if (nextLv.isBreak){
-          nextEl.innerHTML = `Next: <b>${nextLv.label || 'Break'}</b>`;
-        } else {
-          const nAnte = (nextLv.anteMode === "BB") ? ` · BB Ante ${nextLv.bb}` : '';
-          nextEl.innerHTML = `Next: <b>${nextLv.sb} / ${nextLv.bb}</b>${nAnte}`;
-        }
-      } else {
-        nextEl.textContent = 'Next: —';
-      }
-
-      // side stats
-      const st = state.stats || {};
-      const registered = st.registered ?? 0;
-      const alive = st.alive ?? 0;
-      const startStack = state.tournament?.startStack ?? 0;
-      const reentries = st.reentries ?? 0;
-
-      const entries = calcEntries();
-      const avg = calcAvg();
-
-      document.getElementById('stats').innerHTML =
-        `<div class="row play"><span>В игре</span><b>${alive} из ${registered}</b></div>` +
-        `<div class="row"><span>Всего входов</span><b>${NF.format(entries)}</b></div>` +
-        `<div class="row"><span>Ре-энтри</span><b>${NF.format(reentries)}</b></div>` +
-        `<div class="row"><span>Стартовый стек</span><b>${NF.format(startStack)}</b></div>` +
-        `<div class="row"><span>Средний стек</span><b>${NF.format(avg)}</b></div>`;
+      const rem=remainingSec(),timeEl=document.getElementById('time');
+      timeEl.textContent=rem===null?'--:--':fmtTime(rem);
+      document.getElementById('durationPill').textContent=lv.min?`${lv.min} min`:'—';
+      if(rem!==null&&rem<=60){timeEl.style.color="#ff6b6b";timeEl.style.textShadow="0 0 44px rgba(255,80,80,.55)";}else{timeEl.style.color="";timeEl.style.textShadow="";}
+      const nextEl=document.getElementById('next');
+      if(nextLv){if(nextLv.isBreak)nextEl.innerHTML=`Next: <b>${nextLv.label||'Break'}</b>`;else{const parts=[NF.format(nextLv.sb),NF.format(nextLv.bb)];if(nextLv.anteMode==="BB")parts.push(NF.format(nextLv.bb));nextEl.innerHTML=`Next: <b>${parts.join(' / ')}</b>`;}}else nextEl.textContent='Next: —';
+      const st=state.stats||{};
+      document.getElementById('stats').innerHTML=
+        statRow('В игре',`${st.alive??0} из ${st.registered??0}`)+
+        statRow('Ре-энтри',NF.format(st.reentries??0))+
+        statRow('Стартовый стек',NF.format(state.tournament?.startStack??0))+
+        statRow('Средний стек',NF.format(calcAvg()),true)+
+        statRow('Фишек в игре',NF.format(calcTotalChips()),true);
     }
-
-    async function loadOnce(){
-      const { data, error } = await sb.from('rooms').select('state').eq('room_id', roomId).single();
-      if (error) throw error;
-      state = normalizeState(data.state);
-      render();
-      lastSig = JSON.stringify(state);
-    }
-
-    function subscribeRealtime(){
-      if (!roomId) return;
-      sb.channel('rooms-'+roomId)
-        .on('postgres_changes',
-            { event:'UPDATE', schema:'public', table:'rooms', filter:`room_id=eq.${roomId}` },
-            payload => {
-              state = normalizeState(payload.new.state);
-              render();
-              lastSig = JSON.stringify(state);
-            })
-        .subscribe();
-    }
-
-    // fallback poll (in case realtime disabled)
-    async function poll(){
+    async function loadOnce(){const{data,error}=await sb.from('rooms').select('state').eq('room_id',roomId).single();if(error)throw error;state=normalizeState(data.state);render();lastSig=JSON.stringify(state);}
+    let realtimeChannel=null;
+    function subscribeRealtime(){if(!roomId)return;if(realtimeChannel)sb.removeChannel(realtimeChannel);realtimeChannel=sb.channel('rooms-'+roomId).on('postgres_changes',{event:'UPDATE',schema:'public',table:'rooms',filter:`room_id=eq.${roomId}`},payload=>{state=normalizeState(payload.new.state);lastSig=JSON.stringify(state);render();}).subscribe();}
+    async function poll(){if(pollInFlight)return;pollInFlight=true;try{const{data,error}=await sb.from('rooms').select('state').eq('room_id',roomId).single();if(error)throw error;const norm=normalizeState(data.state),sig=JSON.stringify(norm);if(sig!==lastSig){state=norm;lastSig=sig;render();}}catch(e){document.getElementById('err').textContent=e.message;}finally{pollInFlight=false;}}
+    document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")poll();});
+    let displayAdvanceInFlight=false;
+    async function displayAutoAdvance(){
+      if(displayAdvanceInFlight||!roomId||!state)return;
+      const ti=state.timer;if(!ti?.isRunning||ti.isPaused||!ti.levelEndAt)return;if(nowMs()<ti.levelEndAt)return;
+      displayAdvanceInFlight=true;
       try{
-        const { data, error } = await sb.from('rooms').select('state').eq('room_id', roomId).single();
-        if (error) throw error;
-        const norm = normalizeState(data.state);
-        const sig = JSON.stringify(norm);
-        if (sig !== lastSig){
-          state = norm;
-          lastSig = sig;
-          render();
-        }
-      }catch(e){
-        document.getElementById('err').textContent = e.message;
-      }
+        const{data,error}=await sb.from('rooms').select('state').eq('room_id',roomId).single();if(error)throw error;
+        const fresh=normalizeState(data.state),ft=fresh.timer;
+        if(!ft?.isRunning||ft.isPaused||!ft.levelEndAt)return;if(nowMs()<ft.levelEndAt)return;
+        const next=structuredClone(fresh),t=next.timer,hasNext=!!next.structure.levels[t.levelIndex+1];
+        if(!hasNext){t.isRunning=false;t.isPaused=false;t.levelEndAt=null;t.pauseRemainingSec=null;}
+        else{t.levelIndex+=1;t.isRunning=true;t.isPaused=false;t.pauseRemainingSec=null;const lv=next.structure.levels[t.levelIndex]||{min:0};t.levelEndAt=nowMs()+(clampInt(lv.min,0)*60000);}
+        const{error:saveErr}=await sb.from('rooms').update({state:next}).eq('room_id',roomId);if(saveErr)throw saveErr;
+        state=next;lastSig=JSON.stringify(state);render();
+      }catch(e){console.warn('displayAutoAdvance failed',e);}finally{displayAdvanceInFlight=false;}
     }
-
-    // smooth countdown without spamming DB
-    setInterval(render, 250);
-
-    if (!roomId){
-      document.getElementById('err').textContent = "No room id in URL. Use ?room=XXXXXX";
-    } else {
-      loadOnce().catch(e => document.getElementById('err').textContent = e.message);
-      subscribeRealtime();
-      setInterval(poll, 1500);
-    }
+    setInterval(async()=>{try{await displayAutoAdvance();}catch(e){}},1000);
+    setInterval(render,250);
+    if(!roomId){document.getElementById('err').textContent="No room id in URL. Use ?room=XXXXXX";}
+    else{loadOnce().catch(e=>document.getElementById('err').textContent=e.message);subscribeRealtime();setInterval(poll,1500);}
   </script>
 </body>
 </html>

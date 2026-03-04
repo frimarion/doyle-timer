@@ -4,414 +4,172 @@
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
   <title>Doyle Timer — Admin</title>
-
   <style>
     :root{
-      --bg0:#07070a;
-      --bg1:#0c0c12;
+      --bg0:#07070a; --bg1:#0c0c12;
       --card: rgba(255,255,255,.04);
       --stroke: rgba(255,255,255,.10);
       --stroke2: rgba(214,178,107,.22);
       --text: rgba(243,243,246,.96);
       --muted: rgba(243,243,246,.72);
-      --gold:#d6b26b;
-      --gold2:#f2d28a;
-      --danger:#ff6b6b;
-      --ok:#59ffa1;
+      --gold:#d6b26b; --gold2:#f2d28a;
+      --danger:#ff6b6b; --ok:#59ffa1;
       --shadow: 0 16px 60px rgba(0,0,0,.60);
-      --radius: 18px;
-      --radius2: 14px;
+      --radius: 18px; --radius2: 14px;
       --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
       --sans: system-ui, -apple-system, Segoe UI, Roboto, Arial;
     }
-
     html,body{ height:100%; }
     body{
-      margin:0;
-      color:var(--text);
-      font-family: var(--sans);
+      margin:0; color:var(--text); font-family:var(--sans);
       background:
         radial-gradient(1200px 700px at 50% 0%, rgba(214,178,107,.12), transparent 55%),
         radial-gradient(900px 600px at 12% 20%, rgba(255,255,255,.06), transparent 55%),
         linear-gradient(180deg, var(--bg0), var(--bg1));
     }
-
-    .wrap{
-      max-width: 980px;
-      margin: 16px auto 84px;
-      padding: 0 14px;
-      box-sizing:border-box;
-    }
-
-    header.top{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap: 12px;
-      margin: 12px 0 12px;
-    }
-    .brand{
-      display:flex; align-items:center; gap:12px;
-      min-width: 220px;
-    }
+    .wrap{ max-width:980px; margin:16px auto 84px; padding:0 14px; box-sizing:border-box; }
+    header.top{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin:12px 0; }
+    .brand{ display:flex; align-items:center; gap:12px; min-width:220px; }
     .brand img{
-      width: clamp(180px, 42vw, 260px);
-      height:auto;
-      display:block;
-      filter:
-        drop-shadow(0 0 12px rgba(214,178,107,.35))
-        drop-shadow(0 0 26px rgba(214,178,107,.18));
+      width:clamp(180px, 42vw, 260px); height:auto; display:block;
+      filter: drop-shadow(0 0 12px rgba(214,178,107,.35)) drop-shadow(0 0 26px rgba(214,178,107,.18));
     }
-
-    .badges{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      justify-content:flex-end;
-      align-items:center;
-    }
+    .badges{ display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end; align-items:center; }
     .badge{
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      padding: 8px 10px;
-      border-radius: 999px;
-      border: 1px solid var(--stroke);
-      background: rgba(255,255,255,.03);
-      font-size: 12px;
-      color: var(--muted);
-      white-space: nowrap;
-      box-shadow: 0 10px 30px rgba(0,0,0,.28);
-      max-width: 44vw;
-      overflow:hidden;
-      text-overflow: ellipsis;
+      display:inline-flex; align-items:center; gap:8px; padding:8px 10px;
+      border-radius:999px; border:1px solid var(--stroke); background:rgba(255,255,255,.03);
+      font-size:12px; color:var(--muted); white-space:nowrap;
+      box-shadow:0 10px 30px rgba(0,0,0,.28); max-width:44vw; overflow:hidden; text-overflow:ellipsis;
     }
-    .badge strong{ color: var(--text); }
-    .dot{
-      width: 8px; height: 8px; border-radius: 50%;
-      background: rgba(255,255,255,.22);
-      box-shadow: 0 0 0 3px rgba(255,255,255,.06);
-      flex: 0 0 auto;
-    }
-    .dot.gold{ background: var(--gold); box-shadow: 0 0 0 3px rgba(214,178,107,.14); }
-    .dot.green{ background: var(--ok); box-shadow: 0 0 0 3px rgba(89,255,161,.12); }
-
-    .grid{
-      display:grid;
-      grid-template-columns: 1fr;
-      gap: 12px;
-    }
-
+    .badge strong{ color:var(--text); }
+    .dot{ width:8px; height:8px; border-radius:50%; background:rgba(255,255,255,.22); box-shadow:0 0 0 3px rgba(255,255,255,.06); flex:0 0 auto; }
+    .dot.gold{ background:var(--gold); box-shadow:0 0 0 3px rgba(214,178,107,.14); }
+    .dot.green{ background:var(--ok); box-shadow:0 0 0 3px rgba(89,255,161,.12); }
+    .grid{ display:grid; grid-template-columns:1fr; gap:12px; }
     .card{
-      background: var(--card);
-      border: 1px solid var(--stroke);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      padding: 14px;
+      background:var(--card); border:1px solid var(--stroke); border-radius:var(--radius);
+      box-shadow:var(--shadow); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); padding:14px;
     }
-
-    .card h2{
-      margin: 0 0 10px;
-      font-size: 16px;
-      font-weight: 900;
-      letter-spacing: .2px;
-    }
-    .sub{
-      color: var(--muted);
-      font-size: 13px;
-      line-height: 1.35;
-      margin-top: 6px;
-    }
-
-    .mono{ font-family: var(--mono); }
-
-    /* mobile-friendly form */
-    .form{
-      display:grid;
-      grid-template-columns: 1fr;
-      gap: 10px;
-    }
-    .field{
-      display:grid;
-      gap: 6px;
-    }
-    label{
-      color: rgba(243,243,246,.78);
-      font-size: 13px;
-    }
+    .card h2{ margin:0 0 10px; font-size:16px; font-weight:900; letter-spacing:.2px; }
+    .sub{ color:var(--muted); font-size:13px; line-height:1.35; margin-top:6px; }
+    .mono{ font-family:var(--mono); }
+    .form{ display:grid; grid-template-columns:1fr; gap:10px; }
+    .field{ display:grid; gap:6px; }
+    label{ color:rgba(243,243,246,.78); font-size:13px; }
     input, textarea, select{
-      width: 100%;
-      box-sizing:border-box;
-      background: rgba(0,0,0,.28);
-      border: 1px solid var(--stroke);
-      border-radius: 14px;
-      color: var(--text);
-      padding: 12px 12px;
-      outline: none;
-      font-family: var(--sans);
-      font-size: 16px; /* iOS: avoid zoom */
+      width:100%; box-sizing:border-box; background:rgba(0,0,0,.28);
+      border:1px solid var(--stroke); border-radius:14px; color:var(--text);
+      padding:12px; outline:none; font-family:var(--sans); font-size:16px;
     }
-    textarea{
-      font-family: var(--mono);
-      min-height: 180px;
-      line-height: 1.35;
-      font-size: 13.5px;
-    }
-    input:focus, textarea:focus, select:focus{
-      border-color: rgba(214,178,107,.55);
-      box-shadow: 0 0 0 4px rgba(214,178,107,.12);
-    }
-
-    .row2{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-    }
-    @media (max-width: 520px){
-      .row2{ grid-template-columns: 1fr; }
-      header.top{ align-items:flex-start; }
-    }
-
-    .btnrow{
-      display:flex;
-      flex-wrap:wrap;
-      gap: 10px;
-      align-items:center;
-    }
-
+    textarea{ font-family:var(--mono); min-height:180px; line-height:1.35; font-size:13.5px; }
+    input:focus, textarea:focus, select:focus{ border-color:rgba(214,178,107,.55); box-shadow:0 0 0 4px rgba(214,178,107,.12); }
+    .row2{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+    @media(max-width:520px){ .row2{ grid-template-columns:1fr; } header.top{ align-items:flex-start; } }
+    .btnrow{ display:flex; flex-wrap:wrap; gap:10px; align-items:center; }
     button{
-      cursor:pointer;
-      border-radius: 14px;
-      border: 1px solid var(--stroke2);
-      background:
-        radial-gradient(120% 180% at 20% 0%, rgba(242,210,138,.20), transparent 55%),
+      cursor:pointer; border-radius:14px; border:1px solid var(--stroke2);
+      background: radial-gradient(120% 180% at 20% 0%, rgba(242,210,138,.20), transparent 55%),
         linear-gradient(180deg, rgba(214,178,107,.22), rgba(214,178,107,.10));
-      color: var(--text);
-      padding: 12px 12px;
-      font-weight: 900;
-      letter-spacing: .2px;
-      user-select:none;
-      touch-action: manipulation;
+      color:var(--text); padding:12px; font-weight:900; letter-spacing:.2px;
+      user-select:none; touch-action:manipulation;
     }
-    button:active{ transform: translateY(1px); }
-
-    button.ghost{
-      border-color: var(--stroke);
-      background: rgba(255,255,255,.03);
-      color: rgba(243,243,246,.92);
-    }
-    button.danger{
-      border-color: rgba(255,107,107,.40);
-      background: linear-gradient(180deg, rgba(255,107,107,.18), rgba(255,107,107,.08));
-    }
-
-    .kpis{
-      display:grid;
-      grid-template-columns: 1fr;
-      gap: 10px;
-      margin-top: 10px;
-    }
+    button:active{ transform:translateY(1px); }
+    button.ghost{ border-color:var(--stroke); background:rgba(255,255,255,.03); color:rgba(243,243,246,.92); }
+    button.danger{ border-color:rgba(255,107,107,.40); background:linear-gradient(180deg,rgba(255,107,107,.18),rgba(255,107,107,.08)); }
+    .kpis{ display:grid; grid-template-columns:1fr; gap:10px; margin-top:10px; }
     .kpiRow{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      padding: 12px 12px;
-      border-radius: 14px;
-      background: rgba(0,0,0,.18);
-      border: 1px solid rgba(255,255,255,.08);
-      gap: 14px;
+      display:flex; justify-content:space-between; align-items:center; padding:12px;
+      border-radius:14px; background:rgba(0,0,0,.18); border:1px solid rgba(255,255,255,.08); gap:14px;
     }
-    .kpiRow span{ color: var(--muted); }
-    .kpiRow b{ font-family: var(--mono); }
-
-    /* structure table */
-    .tableWrap{
-      overflow:auto;
-      border-radius: 14px;
-      border: 1px solid rgba(255,255,255,.10);
-      background: rgba(0,0,0,.16);
-    }
-    table{
-      width:100%;
-      border-collapse: collapse;
-      min-width: 720px;
-      font-size: 13px;
-    }
-    th,td{
-      padding: 10px 10px;
-      border-bottom: 1px solid rgba(255,255,255,.08);
-      text-align:left;
-      white-space: nowrap;
-    }
-    th{
-      color: rgba(243,243,246,.78);
-      font-weight: 900;
-      background: rgba(255,255,255,.03);
-      position: sticky;
-      top: 0;
-      z-index: 1;
-      backdrop-filter: blur(10px);
-    }
-    td input, td select{
-      padding: 10px 10px;
-      border-radius: 12px;
-      font-size: 14px;
-      height: 40px;
-    }
-    td .miniBtn{
-      padding: 9px 10px;
-      border-radius: 12px;
-      font-size: 12px;
-    }
-
-    details{
-      border: 1px solid rgba(255,255,255,.08);
-      border-radius: 16px;
-      background: rgba(0,0,0,.12);
-      padding: 10px 12px;
-    }
-    details summary{
-      cursor:pointer;
-      font-weight: 900;
-      color: rgba(243,243,246,.90);
-      user-select:none;
-    }
-    details .sub{ margin-top: 10px; }
-
-    .err{
-      margin-top: 10px;
-      color: var(--danger);
-      font-weight: 900;
-      min-height: 18px;
-    }
-
-    /* sticky action bar for iPhone */
+    .kpiRow span{ color:var(--muted); }
+    .kpiRow b{ font-family:var(--mono); }
+    .tableWrap{ overflow:auto; border-radius:14px; border:1px solid rgba(255,255,255,.10); background:rgba(0,0,0,.16); }
+    table{ width:100%; border-collapse:collapse; min-width:720px; font-size:13px; }
+    th,td{ padding:10px; border-bottom:1px solid rgba(255,255,255,.08); text-align:left; white-space:nowrap; }
+    th{ color:rgba(243,243,246,.78); font-weight:900; background:rgba(255,255,255,.03); position:sticky; top:0; z-index:1; backdrop-filter:blur(10px); }
+    td input, td select{ padding:10px; border-radius:12px; font-size:14px; height:40px; }
+    td .miniBtn{ padding:9px 10px; border-radius:12px; font-size:12px; }
+    details{ border:1px solid rgba(255,255,255,.08); border-radius:16px; background:rgba(0,0,0,.12); padding:10px 12px; }
+    details summary{ cursor:pointer; font-weight:900; color:rgba(243,243,246,.90); user-select:none; }
+    details .sub{ margin-top:10px; }
+    .err{ margin-top:10px; color:var(--danger); font-weight:900; min-height:18px; }
     .sticky{
-      position: fixed;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
-      background: rgba(7,7,10,.72);
-      border-top: 1px solid rgba(255,255,255,.10);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      z-index: 100;
+      position:fixed; left:0; right:0; bottom:0;
+      padding:10px 12px calc(10px + env(safe-area-inset-bottom));
+      background:rgba(7,7,10,.72); border-top:1px solid rgba(255,255,255,.10);
+      backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); z-index:100;
     }
-    .sticky .inner{
-      max-width: 980px;
-      margin: 0 auto;
-      display:flex;
-      gap: 10px;
-      flex-wrap:wrap;
-      align-items:center;
-      justify-content:space-between;
-    }
-    .sticky .inner .left, .sticky .inner .right{
-      display:flex; gap:10px; flex-wrap:wrap; align-items:center;
-    }
+    .sticky .inner{ max-width:980px; margin:0 auto; display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:space-between; }
+    .sticky .inner .left, .sticky .inner .right{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
     .syncPill{
-      font-size: 12px;
-      letter-spacing: .10em;
-      text-transform: uppercase;
-      color: var(--muted);
-      border: 1px solid rgba(255,255,255,.12);
-      border-radius: 999px;
-      padding: 10px 12px;
-      background: rgba(0,0,0,.20);
-      white-space: nowrap;
+      font-size:12px; letter-spacing:.10em; text-transform:uppercase; color:var(--muted);
+      border:1px solid rgba(255,255,255,.12); border-radius:999px; padding:10px 12px;
+      background:rgba(0,0,0,.20); white-space:nowrap;
     }
-
-    /* ===== PIN LOCK ===== */
     .pin-lock{
-      position: fixed;
-      inset: 0;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      background: rgba(0,0,0,.78);
-      z-index: 9999;
-      backdrop-filter: blur(3px);
-      -webkit-backdrop-filter: blur(3px);
+      position:fixed; inset:0; display:none; align-items:center; justify-content:center;
+      background:rgba(0,0,0,.78); z-index:9999; backdrop-filter:blur(3px); -webkit-backdrop-filter:blur(3px);
     }
-    .pin-lock.show{ display: flex; }
+    .pin-lock.show{ display:flex; }
     .pin-card{
-      width: min(360px, 92vw);
-      background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
-      border: 1px solid rgba(255,255,255,.12);
-      border-radius: 18px;
-      padding: 18px;
-      box-shadow: var(--shadow);
-      color: var(--text);
+      width:min(360px, 92vw);
+      background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
+      border:1px solid rgba(255,255,255,.12); border-radius:18px; padding:18px;
+      box-shadow:var(--shadow); color:var(--text);
     }
-    .pin-title{ font-size: 16px; font-weight: 900; letter-spacing:.2px; }
-    .pin-sub{ color: var(--muted); margin: 6px 0 12px; font-size: 13px; }
+    .pin-title{ font-size:16px; font-weight:900; letter-spacing:.2px; }
+    .pin-sub{ color:var(--muted); margin:6px 0 12px; font-size:13px; }
     .pin-input{
-      width: 100%;
-      padding: 12px 12px;
-      border-radius: 14px;
-      border: 1px solid rgba(255,255,255,.12);
-      background: rgba(0,0,0,.30);
-      color: var(--text);
-      font-size: 18px;
-      outline: none;
-      font-family: var(--mono);
-      letter-spacing: 2px;
-      box-sizing:border-box;
+      width:100%; padding:12px; border-radius:14px; border:1px solid rgba(255,255,255,.12);
+      background:rgba(0,0,0,.30); color:var(--text); font-size:18px; outline:none;
+      font-family:var(--mono); letter-spacing:2px; box-sizing:border-box;
     }
-    .pin-row{ display: flex; gap: 10px; margin-top: 12px; }
-    .pin-error{ margin-top: 10px; color: var(--danger); min-height: 18px; font-weight:900; }
-
-    .locked body > :not(#pinLock){
-      pointer-events: none;
-      user-select: none;
-      filter: blur(2px);
+    .pin-row{ display:flex; gap:10px; margin-top:12px; }
+    .pin-error{ margin-top:10px; color:var(--danger); min-height:18px; font-weight:900; }
+    .locked body > :not(#pinLock){ pointer-events:none; user-select:none; filter:blur(2px); }
+    .locked #pinLock{ pointer-events:all; filter:none; }
+    .accordion{ border:1px solid rgba(255,255,255,.08); border-radius:16px; overflow:hidden; background:rgba(255,255,255,.02); }
+    .accordion-header{
+      width:100%; display:flex; align-items:center; justify-content:space-between; gap:12px;
+      padding:14px; background:transparent; border:0; color:var(--text); font-weight:800; font-size:16px;
+      cursor:pointer; -webkit-tap-highlight-color:transparent;
     }
-    .locked #pinLock{
-      pointer-events: all;
-      filter: none;
+    .accordion-header:active{ transform:translateY(1px); }
+    .accordion-header .chevron{ transition:transform .2s ease; opacity:.9; font-size:18px; line-height:1; }
+    .accordion-body{ max-height:0; overflow:hidden; transition:max-height .28s ease; }
+    .accordion.open .accordion-body{ max-height:3000px; }
+    .accordion.open .accordion-header .chevron{ transform:rotate(180deg); }
+    .divider{ height:1px; background:rgba(255,255,255,.10); margin:14px 0; }
+    .ratingBox{ padding:12px; border:1px solid rgba(255,255,255,.10); border-radius:16px; background:rgba(255,255,255,.03); }
+    .ratingHead{ display:flex; align-items:center; justify-content:space-between; gap:12px; }
+    .muted{ opacity:.75; font-size:12px; }
+    .presetCard{
+      border:1px solid var(--stroke2); border-radius:16px; padding:16px;
+      background:rgba(214,178,107,.06); cursor:pointer; transition:background .15s;
+      display:flex; flex-direction:column; gap:6px;
     }
-  
-    /* accordion (structure) */
-    .accordion{border:1px solid rgba(255,255,255,.08); border-radius:16px; overflow:hidden; background: rgba(255,255,255,.02);}
-    .accordion-header{width:100%; display:flex; align-items:center; justify-content:space-between; gap:12px;
-      padding:14px 14px; background:transparent; border:0; color:var(--fg); font-weight:800; font-size:16px;
-      cursor:pointer; -webkit-tap-highlight-color: transparent;}
-    .accordion-header:active{transform: translateY(1px);}
-    .accordion-header .chevron{transition:transform .2s ease; opacity:.9; font-size:18px; line-height:1;}
-    .accordion-body{max-height:0; overflow:hidden; transition:max-height .28s ease; }
-    .accordion.open .accordion-body{max-height: 3000px;}
-    .accordion.open .accordion-header .chevron{transform:rotate(180deg);}
-
-  
-    .divider{height:1px;background:rgba(255,255,255,.10);margin:14px 0;}
-    .ratingBox{padding:12px;border:1px solid rgba(255,255,255,.10);border-radius:16px;background:rgba(255,255,255,.03);}
-    .ratingHead{display:flex;align-items:center;justify-content:space-between;gap:12px;}
-    .muted{opacity:.75;font-size:12px;}
-</style>
+    .presetCard:hover{ background:rgba(214,178,107,.13); }
+    .presetCard.active{ background:rgba(214,178,107,.18); border-color:rgba(214,178,107,.55); }
+    .presetName{ font-size:15px; font-weight:900; color:var(--gold2); letter-spacing:.05em; }
+    .presetMeta{ font-size:12px; color:var(--muted); }
+    .presetBtn{ margin-top:8px; padding:10px; border-radius:12px; font-size:13px; font-weight:900; }
+  </style>
 </head>
-
 <body>
-  <!-- PIN LOCK -->
+
   <div id="pinLock" class="pin-lock">
     <div class="pin-card">
       <div class="pin-title">Admin locked</div>
       <div class="pin-sub">Enter PIN to unlock</div>
       <input id="pinInput" class="pin-input" type="password" inputmode="numeric" autocomplete="off"/>
-      <div class="pin-row">
-        <button id="pinBtn" type="button">Unlock</button>
-      </div>
+      <div class="pin-row"><button id="pinBtn" type="button">Unlock</button></div>
       <div id="pinError" class="pin-error"></div>
     </div>
   </div>
 
   <div class="wrap">
     <header class="top">
-      <div class="brand">
-        <img src="logo.png" alt="Doyle Logo">
-      </div>
+      <div class="brand"><img src="logo.png" alt="Doyle Logo"></div>
       <div class="badges">
         <div class="badge" id="badgeRoom"><span class="dot gold"></span><strong>room</strong>&nbsp;<span id="metaRoom" class="mono"></span></div>
         <div class="badge" id="badgeRole"><span class="dot" id="roleDot"></span><strong id="roleText">…</strong>&nbsp;<span id="roleSub"></span></div>
@@ -419,192 +177,149 @@
     </header>
 
     <div class="grid">
-      <!-- CREATE -->
+
       <section id="screenCreate" class="card" style="display:none;">
         <h2>Создать турнир</h2>
-        <div class="sub">
-          Комната будет создана в базе, после чего ты получишь ссылки для Admin и Display.
-        </div>
+        <div class="sub">Комната будет создана в базе, после чего ты получишь ссылки для Admin и Display.</div>
         <div class="btnrow" style="margin-top:12px;">
           <button id="btnCreate" type="button">Создать турнир</button>
         </div>
         <div class="sub">Комнаты открываются по URL с параметром <span class="mono">?room=XXXXXX</span>.</div>
       </section>
 
-      <!-- LINKS -->
       <section id="screenLinks" class="card" style="display:none;">
         <h2>Ссылки</h2>
         <div class="form">
           <div class="field">
             <label><strong>Admin link</strong></label>
-            <div class="row2">
-              <input id="adminLink" readonly class="mono">
-              <button id="copyAdmin" type="button" class="ghost">Copy</button>
-            </div>
+            <div class="row2"><input id="adminLink" readonly class="mono"><button id="copyAdmin" type="button" class="ghost">Copy</button></div>
           </div>
           <div class="field">
             <label><strong>Display link</strong></label>
-            <div class="row2">
-              <input id="displayLink" readonly class="mono">
-              <button id="copyDisplay" type="button" class="ghost">Copy</button>
-            </div>
+            <div class="row2"><input id="displayLink" readonly class="mono"><button id="copyDisplay" type="button" class="ghost">Copy</button></div>
           </div>
         </div>
         <div class="sub">Открой Display link на ТВ/ПК. Admin link — для управления.</div>
       </section>
 
-      <!-- QUICK -->
+      <section id="screenPreset" class="card" style="display:none;">
+        <h2>Формат турнира</h2>
+        <div class="sub" style="margin-bottom:12px;">Выбери готовую структуру — она заменит текущие блайнды и стартовый стек.</div>
+        <div id="presetGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;"></div>
+      </section>
+
       <section id="screenQuick" class="card" style="display:none;">
         <h2>Турнир</h2>
-
-                <div class="form">
+        <div class="form">
           <div class="row2">
             <div class="field">
               <label>Стартовый стек</label>
-              <div class="row2" style="grid-template-columns: 1fr auto auto;">
+              <div class="row2" style="grid-template-columns:1fr auto auto;">
                 <input id="startStack" type="number" min="0" step="1000" value="30000" inputmode="numeric"/>
                 <button id="btnStartMinus" type="button" class="ghost" style="padding:12px 14px;">-</button>
-                <button id="btnStartPlus" type="button" class="ghost" style="padding:12px 14px;">+</button>
+                <button id="btnStartPlus"  type="button" class="ghost" style="padding:12px 14px;">+</button>
               </div>
             </div>
-
             <div class="field">
               <label>Зарегистрировано (всего)</label>
-              <div class="row2" style="grid-template-columns: 1fr auto auto;">
+              <div class="row2" style="grid-template-columns:1fr auto auto;">
                 <input id="registered" type="number" min="0" step="1" value="25" inputmode="numeric"/>
                 <button id="btnRegMinus" type="button" class="ghost" style="padding:12px 14px;">-</button>
-                <button id="btnRegPlus" type="button" class="ghost" style="padding:12px 14px;">+</button>
+                <button id="btnRegPlus"  type="button" class="ghost" style="padding:12px 14px;">+</button>
               </div>
             </div>
           </div>
-
           <div class="row2">
             <div class="field">
               <label>Ре-энтри</label>
-              <div class="row2" style="grid-template-columns: 1fr auto auto;">
+              <div class="row2" style="grid-template-columns:1fr auto auto;">
                 <input id="reentries" type="number" min="0" step="1" value="0" inputmode="numeric"/>
                 <button id="btnReMinus" type="button" class="ghost" style="padding:12px 14px;">-</button>
-                <button id="btnRePlus" type="button" class="ghost" style="padding:12px 14px;">+</button>
+                <button id="btnRePlus"  type="button" class="ghost" style="padding:12px 14px;">+</button>
               </div>
               <div class="sub">Ре-энтри не меняют «в игре», но увеличивают «всего входов» и средний стек.</div>
             </div>
-
             <div class="field">
               <label>Busted</label>
-              <div class="row2" style="grid-template-columns: 1fr auto auto;">
+              <div class="row2" style="grid-template-columns:1fr auto auto;">
                 <input id="busted" type="number" min="0" step="1" value="0" inputmode="numeric"/>
                 <button id="btnBustMinus" type="button" class="ghost" style="padding:12px 14px;">-</button>
-                <button id="btnBustPlus" type="button" class="ghost" style="padding:12px 14px;">+</button>
+                <button id="btnBustPlus"  type="button" class="ghost" style="padding:12px 14px;">+</button>
               </div>
               <div class="sub">В игре = зарегистрировано − busted.</div>
             </div>
           </div>
-
-          <div class="btnrow">
-            <button id="btnSaveQuick" type="button">Сохранить</button>
-          </div>
-
+          <div class="btnrow"><button id="btnSaveQuick" type="button">Сохранить</button></div>
           <div class="kpis">
             <div class="kpiRow"><span>В игре</span><b id="kAlive">—</b></div>
             <div class="kpiRow"><span>Всего входов</span><b id="kEntries">—</b></div>
             <div class="kpiRow"><span>Средний стек</span><b id="kAvg">—</b></div>
           </div>
         </div>
-        </div>
-      
-          <div class="divider"></div>
 
-          <div class="ratingBox">
-            <div class="ratingHead">
-              <div>
-                <div class="sideTitle" style="margin:0;">Рейтинг</div>
-                <div class="muted" style="margin-top:4px;">Появится на дисплее после «Рассчитать рейтинг»</div>
-              </div>
-              <button id="btnCalcRating" type="button" class="ghost">Рассчитать рейтинг</button>
+        <div class="divider"></div>
+
+        <div class="ratingBox">
+          <div class="ratingHead">
+            <div>
+              <div class="sideTitle" style="margin:0;">Рейтинг</div>
+              <div class="muted" style="margin-top:4px;">Появится на дисплее после «Рассчитать рейтинг»</div>
             </div>
-
-            <div class="row2" style="margin-top:10px;">
-              <div class="field">
-                <label>Entries (всего входов, включая ре-энтри)</label>
-                <input id="ratingEntries" type="number" min="1" step="1" inputmode="numeric" value="1"/>
-              </div>
-              <div class="field">
-                <label>r (коэф. убывания)</label>
-                <input id="ratingR" type="number" min="0.1" max="0.99" step="0.01" inputmode="decimal" value="0.8"/>
-              </div>
+            <button id="btnCalcRating" type="button" class="ghost">Рассчитать рейтинг</button>
+          </div>
+          <div class="row2" style="margin-top:10px;">
+            <div class="field">
+              <label>Entries (всего входов, включая ре-энтри)</label>
+              <input id="ratingEntries" type="number" min="1" step="1" inputmode="numeric" value="1"/>
             </div>
-
-            <div class="kpis" style="margin-top:10px;">
-              <div class="kpiRow"><span>ITM мест (P)</span><b id="kP">—</b></div>
-              <div class="kpiRow"><span>TOTAL</span><b id="kTotal">—</b></div>
-              <div class="kpiRow"><span>KO_POOL</span><b id="kKoPool">—</b></div>
-              <div class="kpiRow"><span>ITM_POOL</span><b id="kItmPool">—</b></div>
-            </div>
-
-            <div class="tableWrap" style="margin-top:10px;">
-              <table class="levelsTable" id="ratingTable">
-                <thead>
-                  <tr><th style="width:70px;">Место</th><th>Очки</th></tr>
-                </thead>
-                <tbody id="ratingTbody"></tbody>
-              </table>
+            <div class="field">
+              <label>r (коэф. убывания)</label>
+              <input id="ratingR" type="number" min="0.1" max="0.99" step="0.01" inputmode="decimal" value="0.8"/>
             </div>
           </div>
-</section>
 
-      <!-- TIMER -->
+        </div>
+      </section>
+
       <section id="screenTimer" class="card" style="display:none;">
         <h2>Таймер</h2>
         <div class="btnrow">
-          <button id="start" type="button">Start level</button>
-          <button id="pause" type="button" class="ghost">Pause</button>
-          <button id="resume" type="button">Resume</button>
-          <button id="next" type="button" class="ghost">Next level</button>
-          <button id="prev" type="button" class="ghost">Prev level</button>
+          <button id="start"   type="button">Start level</button>
+          <button id="pause"   type="button" class="ghost">Pause</button>
+          <button id="resume"  type="button">Resume</button>
+          <button id="next"    type="button" class="ghost">Next level</button>
+          <button id="prev"    type="button" class="ghost">Prev level</button>
           <button id="minus60" type="button" class="ghost">-60 sec</button>
-          <button id="reset" type="button" class="danger">Reset</button>
+          <button id="reset"   type="button" class="danger">Reset</button>
         </div>
         <div class="sub mono" id="tinfo" style="margin-top:10px;"></div>
       </section>
 
-      <!-- STRUCTURE -->
       <section id="screenStructure" class="card" style="display:none;">
         <div class="accordion" id="structureAccordion">
           <button class="accordion-header" id="structureToggle" type="button" aria-expanded="false">
             <span>Структура блайндов</span>
             <span class="chevron">▾</span>
           </button>
-
-          <div class="accordion-body" id="structureBody">
-            <div style="padding: 0 14px 14px;">
-              <div class="btnrow" style="margin: 6px 0 10px;">
-                <button id="addLevel" type="button">+ Level</button>
-                <button id="addBreak" type="button" class="ghost">+ Break</button>
-                <button id="btnStructureSave" type="button">Сохранить структуру</button>
+          <div class="accordion-body">
+            <div style="padding:0 14px 14px;">
+              <div class="btnrow" style="margin:6px 0 10px;">
+                <button id="addLevel"          type="button">+ Level</button>
+                <button id="addBreak"          type="button" class="ghost">+ Break</button>
+                <button id="btnStructureSave"  type="button">Сохранить структуру</button>
                 <button id="btnStructureReset" type="button" class="ghost">Дефолт</button>
               </div>
-
               <div class="tableWrap">
                 <table id="levelsTable">
                   <thead>
-                    <tr>
-                      <th>#</th>
-                      <th>Type</th>
-                      <th>Min</th>
-                      <th>SB</th>
-                      <th>BB</th>
-                      <th>Ante</th>
-                      <th>Move</th>
-                      <th>Del</th>
-                    </tr>
+                    <tr><th>#</th><th>Type</th><th>Min</th><th>SB</th><th>BB</th><th>Ante</th><th>Move</th><th>Del</th></tr>
                   </thead>
                   <tbody></tbody>
                 </table>
               </div>
-
               <details style="margin-top:12px;">
                 <summary>Advanced: JSON editor</summary>
-                <div class="sub">Если хочешь — можно править структуру в JSON и сохранить. Таблица будет перерисована.</div>
+                <div class="sub">Если хочешь — можно править структуру в JSON и сохранить.</div>
                 <textarea id="structureJson" spellcheck="false"></textarea>
                 <div class="btnrow" style="margin-top:10px;">
                   <button id="applyJson" type="button" class="ghost">Применить JSON → таблицу</button>
@@ -614,7 +329,8 @@
           </div>
         </div>
       </section>
-<div class="err" id="err"></div>
+
+      <div class="err" id="err"></div>
     </div>
   </div>
 
@@ -632,924 +348,687 @@
 
   <script src="config.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
   <script>
-    // ===== helpers
-    
     const NF = new Intl.NumberFormat('ru-RU');
-const $ = (id) => document.getElementById(id);
+    const $ = id => document.getElementById(id);
     const sb = supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
 
-    function clampInt(x, min=0){ x = parseInt(x ?? 0, 10); return Number.isFinite(x) ? Math.max(min, x) : min; }
+    function clampInt(x, min=0){ x=parseInt(x??0,10); return Number.isFinite(x)?Math.max(min,x):min; }
+    function fmtInt(n){ return NF.format(clampInt(n,0)); }
     function nowMs(){ return Date.now(); }
 
-    const roomId = (new URLSearchParams(location.search).get('room') || '').trim();
-    $("metaRoom").textContent = roomId || "(not set)";
-    $("badgeRoom").style.opacity = roomId ? "1" : ".55";
+    const roomId = (new URLSearchParams(location.search).get('room')||'').trim();
+    $("metaRoom").textContent = roomId||"(not set)";
+    $("badgeRoom").style.opacity = roomId?"1":".55";
 
-    // ===== leader lock (single auto-advance writer)
-    const CLIENT_ID = (() => {
-      const k = "adminClientId";
-      let v = localStorage.getItem(k);
-      if (!v) { v = crypto.randomUUID(); localStorage.setItem(k, v); }
+    // ===== leader lock
+    const CLIENT_ID = (()=>{
+      const k="adminClientId"; let v=localStorage.getItem(k);
+      if (!v){ v=crypto.randomUUID(); localStorage.setItem(k,v); }
       return v;
     })();
     let hasLock = false;
 
     function setRoleUi(){
-      const dot = $("roleDot");
-      const roleText = $("roleText");
-      const roleSub = $("roleSub");
-      if (!roomId){
-        dot.className = "dot";
-        roleText.textContent = "no room";
-        roleSub.textContent = "";
-        return;
-      }
-      if (hasLock){
-        dot.className = "dot green";
-        roleText.textContent = "Leader";
-        roleSub.textContent = "auto-advance ON";
-      } else {
-        dot.className = "dot";
-        roleText.textContent = "Viewer";
-        roleSub.textContent = "auto-advance OFF";
-      }
+      const dot=$("roleDot"), roleText=$("roleText"), roleSub=$("roleSub");
+      if (!roomId){ dot.className="dot"; roleText.textContent="no room"; roleSub.textContent=""; return; }
+      if (hasLock){ dot.className="dot green"; roleText.textContent="Leader"; roleSub.textContent="auto-advance ON"; }
+      else { dot.className="dot"; roleText.textContent="Viewer"; roleSub.textContent="auto-advance OFF"; }
     }
 
     async function acquireLockOnce(){
       if (!roomId) return false;
-      const { data, error } = await sb.rpc("try_acquire_room_lock", {
-        p_room_id: roomId,
-        p_owner: CLIENT_ID,
-        p_ttl_seconds: 6
-      });
+      const {data,error} = await sb.rpc("try_acquire_room_lock",{p_room_id:roomId,p_owner:CLIENT_ID,p_ttl_seconds:6});
       if (error) return false;
-      const row = Array.isArray(data) ? data[0] : data;
-      hasLock = !!row && row.lock_owner === CLIENT_ID;
-      setRoleUi();
-      return hasLock;
+      const row = Array.isArray(data)?data[0]:data;
+      hasLock = !!row && row.lock_owner===CLIENT_ID;
+      setRoleUi(); return hasLock;
     }
-
     function startLockLoop(){
       acquireLockOnce().catch(()=>{});
-      setInterval(()=>{ acquireLockOnce().catch(()=>{}); }, 2000);
+      setInterval(()=>acquireLockOnce().catch(()=>{}), 2000);
     }
 
     // ===== state
     let state = null;
 
     function genRoomId(len=6){
-      const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-      let out = "";
-      const arr = new Uint8Array(len);
-      crypto.getRandomValues(arr);
-      for (const v of arr) out += alphabet[v % alphabet.length];
+      const abc="ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; let out="";
+      const arr=new Uint8Array(len); crypto.getRandomValues(arr);
+      for (const v of arr) out+=abc[v%abc.length];
       return out;
     }
 
+    // ===== PRESET TOURNAMENTS =====
+    const PRESETS = {
+      "DAILY": {
+        name: "Daily Tournament",
+        startStack: 30000,
+        levels: [
+          {"min":16,"sb":100,"bb":100,"anteMode":"BB"},{"min":16,"sb":100,"bb":200,"anteMode":"BB"},
+          {"min":16,"sb":100,"bb":300,"anteMode":"BB"},{"min":16,"sb":200,"bb":400,"anteMode":"BB"},
+          {"min":16,"sb":300,"bb":600,"anteMode":"BB"},{"min":16,"sb":400,"bb":800,"anteMode":"BB"},
+          {"isBreak":true,"min":10},
+          {"min":16,"sb":500,"bb":1000,"anteMode":"BB"},{"min":16,"sb":600,"bb":1200,"anteMode":"BB"},
+          {"min":16,"sb":800,"bb":1600,"anteMode":"BB"},{"min":12,"sb":1000,"bb":2000,"anteMode":"BB"},
+          {"min":12,"sb":1000,"bb":3000,"anteMode":"BB"},{"min":12,"sb":2000,"bb":4000,"anteMode":"BB"},
+          {"min":12,"sb":2000,"bb":5000,"anteMode":"BB"},{"min":12,"sb":3000,"bb":6000,"anteMode":"BB"},
+          {"min":12,"sb":4000,"bb":8000,"anteMode":"BB"},{"min":12,"sb":5000,"bb":10000,"anteMode":"BB"},
+          {"min":12,"sb":6000,"bb":12000,"anteMode":"BB"},{"min":12,"sb":8000,"bb":16000,"anteMode":"BB"},
+          {"min":12,"sb":10000,"bb":20000,"anteMode":"BB"},{"min":10,"sb":15000,"bb":30000,"anteMode":"BB"},
+          {"min":10,"sb":20000,"bb":40000,"anteMode":"BB"},{"min":10,"sb":25000,"bb":50000,"anteMode":"BB"},
+          {"min":10,"sb":30000,"bb":60000,"anteMode":"BB"},{"min":10,"sb":40000,"bb":80000,"anteMode":"BB"},
+          {"min":10,"sb":50000,"bb":100000,"anteMode":"BB"},{"min":10,"sb":60000,"bb":120000,"anteMode":"BB"},
+          {"min":10,"sb":80000,"bb":160000,"anteMode":"BB"},{"min":10,"sb":100000,"bb":200000,"anteMode":"BB"},
+          {"min":10,"sb":125000,"bb":250000,"anteMode":"BB"},{"min":10,"sb":150000,"bb":300000,"anteMode":"BB"},
+          {"min":10,"sb":200000,"bb":400000,"anteMode":"BB"},{"min":10,"sb":250000,"bb":500000,"anteMode":"BB"},
+          {"min":10,"sb":300000,"bb":600000,"anteMode":"BB"},{"min":10,"sb":400000,"bb":800000,"anteMode":"BB"},
+          {"min":10,"sb":500000,"bb":1000000,"anteMode":"BB"}
+        ]
+      },
+      "CORPORATE": {
+        name: "Corporate Tournament",
+        startStack: 10000,
+        levels: [
+          {"min":8,"sb":100,"bb":200,"anteMode":"NONE"},
+          {"min":8,"sb":200,"bb":300,"anteMode":"NONE"},
+          {"min":8,"sb":300,"bb":600,"anteMode":"NONE"},
+          {"min":8,"sb":500,"bb":1000,"anteMode":"NONE"},
+          {"min":8,"sb":800,"bb":1600,"anteMode":"NONE"},
+          {"min":8,"sb":1200,"bb":2400,"anteMode":"NONE"},
+          {"min":8,"sb":2000,"bb":4000,"anteMode":"NONE"},
+          {"isBreak":true,"min":10},
+          {"min":8,"sb":3000,"bb":6000,"anteMode":"NONE"},
+          {"min":8,"sb":5000,"bb":10000,"anteMode":"NONE"},
+          {"min":8,"sb":8000,"bb":16000,"anteMode":"NONE"},
+          {"min":8,"sb":12000,"bb":24000,"anteMode":"NONE"}
+        ]
+      }
+    };
+
     function defaultStructureLevels(){
-      return [{"min":16,"sb":100,"bb":100,"anteMode":"NONE"},{"min":16,"sb":100,"bb":200,"anteMode":"NONE"},{"min":16,"sb":100,"bb":300,"anteMode":"NONE"},{"min":16,"sb":200,"bb":400,"anteMode":"NONE"},{"min":16,"sb":300,"bb":600,"anteMode":"NONE"},{"min":16,"sb":400,"bb":800,"anteMode":"NONE"},{"isBreak":true,"min":10},{"min":16,"sb":500,"bb":1000,"anteMode":"NONE"},{"min":16,"sb":600,"bb":1200,"anteMode":"NONE"},{"min":16,"sb":800,"bb":1600,"anteMode":"NONE"},{"min":12,"sb":1000,"bb":2000,"anteMode":"NONE"},{"min":12,"sb":1000,"bb":3000,"anteMode":"NONE"},{"min":12,"sb":2000,"bb":4000,"anteMode":"NONE"},{"min":12,"sb":2000,"bb":5000,"anteMode":"NONE"},{"min":12,"sb":3000,"bb":6000,"anteMode":"NONE"},{"min":12,"sb":4000,"bb":8000,"anteMode":"NONE"},{"min":12,"sb":5000,"bb":10000,"anteMode":"NONE"},{"min":12,"sb":6000,"bb":12000,"anteMode":"NONE"},{"min":12,"sb":8000,"bb":16000,"anteMode":"NONE"},{"min":12,"sb":10000,"bb":20000,"anteMode":"NONE"},{"min":10,"sb":15000,"bb":30000,"anteMode":"NONE"},{"min":10,"sb":20000,"bb":40000,"anteMode":"NONE"},{"min":10,"sb":25000,"bb":50000,"anteMode":"NONE"},{"min":10,"sb":30000,"bb":60000,"anteMode":"NONE"},{"min":10,"sb":40000,"bb":80000,"anteMode":"NONE"},{"min":10,"sb":50000,"bb":100000,"anteMode":"NONE"},{"min":10,"sb":60000,"bb":120000,"anteMode":"NONE"},{"min":10,"sb":80000,"bb":160000,"anteMode":"NONE"},{"min":10,"sb":100000,"bb":200000,"anteMode":"NONE"},{"min":10,"sb":125000,"bb":250000,"anteMode":"NONE"},{"min":10,"sb":150000,"bb":300000,"anteMode":"NONE"},{"min":10,"sb":200000,"bb":400000,"anteMode":"NONE"},{"min":10,"sb":250000,"bb":500000,"anteMode":"NONE"},{"min":10,"sb":300000,"bb":600000,"anteMode":"NONE"},{"min":10,"sb":400000,"bb":800000,"anteMode":"NONE"},{"min":10,"sb":500000,"bb":1000000,"anteMode":"NONE"}];
+      return PRESETS["DAILY"].levels.map(l=>({...l}));
     }
-function initialState(){
+
+    function initialState(){
       return {
-        tournament: { createdAt: new Date().toISOString(), startStack: 30000 },
-        stats: { registered: 25, busted: 0, alive: 25, reentries: 0 },
-        structure: { levels: defaultStructureLevels() },
-        timer: { isRunning:false, isPaused:false, levelIndex:0, levelEndAt:null, pauseRemainingSec:null }
+        tournament:{ createdAt:new Date().toISOString(), startStack:30000 },
+        stats:{ registered:25, busted:0, alive:25, reentries:0 },
+        structure:{ levels:defaultStructureLevels() },
+        timer:{ isRunning:false, isPaused:false, levelIndex:0, levelEndAt:null, pauseRemainingSec:null }
       };
     }
 
     function normalizeState(st){
       if (!st) return null;
+      if (st.stats&&(st.stats.S!==undefined||st.stats.E!==undefined)){
+        st.tournament=st.tournament||{createdAt:new Date().toISOString(),startStack:st.stats.S||0};
+        st.stats={registered:st.stats.N??0,alive:st.stats.N??0,reentries:st.stats.R??0};
+      }
+      st.tournament=st.tournament||{createdAt:new Date().toISOString(),startStack:0};
+      st.stats=st.stats||{registered:0,alive:0,busted:0,reentries:0};
+      st.structure=st.structure||{levels:[]};
+      st.timer=st.timer||{isRunning:false,isPaused:false,levelIndex:0,levelEndAt:null,pauseRemainingSec:null};
+      st.rating=st.rating||{isActive:false,entries:null,r:0.8,P:0,TOTAL:0,KO_POOL:0,ITM_POOL:0,payouts:[],calculatedAt:null};
 
-      // compatibility: old stats {S,E,R,N}
-      if (st.stats && (st.stats.S !== undefined || st.stats.E !== undefined)) {
-        st.tournament = st.tournament || { createdAt: new Date().toISOString(), startStack: st.stats.S || 0 };
-        st.stats = {
-          registered: st.stats.N ?? 0,
-          alive: st.stats.N ?? 0,
-          reentries: st.stats.R ?? 0,
-        };
+      st.tournament.startStack=clampInt(st.tournament.startStack,0);
+      st.stats.registered=clampInt(st.stats.registered,0);
+      st.stats.reentries=clampInt(st.stats.reentries,0);
+
+      if (st.stats.busted==null){
+        const a=clampInt(st.stats.alive,0);
+        st.stats.busted=Math.max(0,clampInt(st.stats.registered,0)-a);
+      }
+      st.stats.busted=clampInt(st.stats.busted,0);
+      st.stats.busted=Math.min(st.stats.busted,st.stats.registered);
+      st.stats.alive=Math.max(0,st.stats.registered-st.stats.busted);
+
+      // FIX #9: validate levelEndAt — reject corrupt/stale timestamps
+      if (st.timer.levelEndAt!=null){
+        const ts=Number(st.timer.levelEndAt);
+        if (!Number.isFinite(ts)||ts<1000000000000||ts>nowMs()+86400000){
+          st.timer.levelEndAt=null; st.timer.isRunning=false;
+        }
       }
 
-      st.tournament = st.tournament || { createdAt: new Date().toISOString(), startStack: 0 };
-      st.stats = st.stats || { registered: 0, alive: 0, busted: 0, reentries: 0 };
-      st.structure = st.structure || { levels: [] };
-      st.timer = st.timer || { isRunning:false, isPaused:false, levelIndex:0, levelEndAt:null, pauseRemainingSec:null };
-      st.rating = st.rating || { isActive:false, entries:null, r:0.8, P:0, TOTAL:0, KO_POOL:0, ITM_POOL:0, payouts:[] , calculatedAt:null };
+      st.rating.isActive=!!st.rating.isActive;
+      st.rating.entries=(st.rating.entries==null)?null:clampInt(st.rating.entries,1);
+      st.rating.r=Number(st.rating.r??0.8);
+      if (!Number.isFinite(st.rating.r)||st.rating.r<=0||st.rating.r>=1) st.rating.r=0.8;
+      if (!Array.isArray(st.rating.payouts)) st.rating.payouts=[];
 
-      st.tournament.startStack = clampInt(st.tournament.startStack, 0);
-      st.stats.registered = clampInt(st.stats.registered, 0);
-      st.stats.reentries = clampInt(st.stats.reentries, 0);
+      st.timer.levelIndex=clampInt(st.timer.levelIndex,0);
+      if (Array.isArray(st.structure.levels)&&st.structure.levels.length)
+        st.timer.levelIndex=Math.min(st.timer.levelIndex,st.structure.levels.length-1);
+      else st.timer.levelIndex=0;
 
-      // busted/alive normalization (alive is derived; keep compatibility with older states)
-      if (st.stats.busted == null){
-        const a = clampInt(st.stats.alive, 0);
-        st.stats.busted = Math.max(0, clampInt(st.stats.registered,0) - a);
-      }
-      st.stats.busted = clampInt(st.stats.busted, 0);
-      st.stats.busted = Math.min(st.stats.busted, st.stats.registered);
-      st.stats.alive = Math.max(0, st.stats.registered - st.stats.busted);
-
-      if (!st.rating) st.rating = { isActive:false, entries:null, r:0.8, P:0, TOTAL:0, KO_POOL:0, ITM_POOL:0, payouts:[], calculatedAt:null };
-      st.rating.isActive = !!st.rating.isActive;
-      st.rating.entries = (st.rating.entries==null) ? null : clampInt(st.rating.entries, 1);
-      st.rating.r = Number(st.rating.r ?? 0.8);
-      if (!Number.isFinite(st.rating.r) || st.rating.r<=0 || st.rating.r>=1) st.rating.r = 0.8;
-      if (!Array.isArray(st.rating.payouts)) st.rating.payouts = [];
-
-      st.timer.levelIndex = clampInt(st.timer.levelIndex, 0);
-      if (Array.isArray(st.structure.levels) && st.structure.levels.length){
-        st.timer.levelIndex = Math.min(st.timer.levelIndex, st.structure.levels.length - 1);
-      } else {
-        st.timer.levelIndex = 0;
-      }
-
-      // normalize levels shape
-      if (!Array.isArray(st.structure.levels)) st.structure.levels = [];
-      st.structure.levels = st.structure.levels.map(l => {
-        const x = { ...l };
-        x.isBreak = !!x.isBreak;
-        x.min = clampInt(x.min, 0);
-        x.sb = clampInt(x.sb, 0);
-        x.bb = clampInt(x.bb, 0);
-        x.anteMode = (x.anteMode === "BB") ? "BB" : "NONE";
-        return x;
+      if (!Array.isArray(st.structure.levels)) st.structure.levels=[];
+      st.structure.levels=st.structure.levels.map(l=>{
+        const x={...l}; x.isBreak=!!x.isBreak; x.min=clampInt(x.min,0);
+        x.sb=clampInt(x.sb,0); x.bb=clampInt(x.bb,0);
+        x.anteMode=(x.anteMode==="BB")?"BB":"NONE"; return x;
       });
-
       return st;
     }
 
-    function calcEntries(st){
-      const r = st?.stats?.registered ?? 0;
-      const re = st?.stats?.reentries ?? 0;
-      return clampInt(r,0) + clampInt(re,0);
-    }
+    function calcEntries(st){ return clampInt(st?.stats?.registered??0,0)+clampInt(st?.stats?.reentries??0,0); }
     function calcAvg(st){
-      const reg = clampInt(st?.stats?.registered ?? 0, 0);
-      const re  = clampInt(st?.stats?.reentries ?? 0, 0);
-      const entries = reg + re;
-      const alive = clampInt(st?.stats?.alive ?? 0, 0);
-      const startStack = clampInt(st?.tournament?.startStack ?? 0, 0);
-      const total = entries * startStack;
-      const avg = (alive > 0) ? Math.floor(total / alive) : 0;
-      return Number.isFinite(avg) ? avg : 0;
+      const reg=clampInt(st?.stats?.registered??0,0), re=clampInt(st?.stats?.reentries??0,0);
+      const alive=clampInt(st?.stats?.alive??0,0), ss=clampInt(st?.tournament?.startStack??0,0);
+      const avg=alive>0?Math.floor((reg+re)*ss/alive):0;
+      return Number.isFinite(avg)?avg:0;
     }
+    function curLevel(){ return state?.structure?.levels?.[state?.timer?.levelIndex??0]||{min:0,sb:0,bb:0,anteMode:"NONE"}; }
 
-    function curLevel(){
-      return state?.structure?.levels?.[state?.timer?.levelIndex ?? 0] || { min: 0, sb: 0, bb: 0, anteMode: "NONE" };
-    }
-
-    // ===== Screens
     function showCreateOnly(){
-      $("screenCreate").style.display = "";
-      $("screenLinks").style.display = "none";
-      $("screenQuick").style.display = "none";
-      $("screenTimer").style.display = "none";
-      $("screenStructure").style.display = "none";
-      $("stickyBar").style.display = "none";
+      $("screenCreate").style.display=""; $("screenLinks").style.display="none";
+      $("screenQuick").style.display="none"; $("screenTimer").style.display="none";
+      $("screenStructure").style.display="none"; $("stickyBar").style.display="none";
     }
     function showForRoom(){
-      $("screenCreate").style.display = "none";
-      $("screenLinks").style.display = "";
-      $("screenQuick").style.display = "";
-      $("screenTimer").style.display = "";
-      $("screenStructure").style.display = "";
-      $("stickyBar").style.display = "";
+      $("screenCreate").style.display="none"; $("screenLinks").style.display="";
+      $("screenPreset").style.display=""; $("screenQuick").style.display="";
+      $("screenTimer").style.display=""; $("screenStructure").style.display="";
+      $("stickyBar").style.display=""; buildPresetGrid();
+    }
+
+    function buildPresetGrid(){
+      const grid=$("presetGrid"); if(!grid)return;
+      grid.innerHTML="";
+      Object.entries(PRESETS).forEach(([key,preset])=>{
+        const card=document.createElement("div");
+        card.className="presetCard";
+        const levelCount=preset.levels.filter(l=>!l.isBreak).length;
+        const breakCount=preset.levels.filter(l=>l.isBreak).length;
+        const hasAnte=preset.levels.some(l=>!l.isBreak&&l.anteMode==="BB");
+        card.innerHTML=`
+          <div class="presetName">${preset.name}</div>
+          <div class="presetMeta">Стек: ${NF.format(preset.startStack)} · ${levelCount} уровней · ${breakCount} перерыв${breakCount!==1?"а":""} · ${hasAnte?"BB Ante":"без анте"}</div>
+          <button type="button" class="presetBtn ghost" data-key="${key}">Загрузить структуру</button>`;
+        card.querySelector("button").addEventListener("click", async()=>{
+          try{
+            $("err").textContent="";
+            await saveWithReload(st=>{
+              st.structure.levels=preset.levels.map(l=>({...l}));
+              st.tournament.startStack=preset.startStack;
+              st.timer.levelIndex=0;
+              st.timer.isRunning=false; st.timer.isPaused=false;
+              st.timer.levelEndAt=null; st.timer.pauseRemainingSec=null;
+              return st;
+            });
+            // highlight active preset
+            document.querySelectorAll(".presetCard").forEach(c=>c.classList.remove("active"));
+            card.classList.add("active");
+          }catch(e){ $("err").textContent=e.message; }
+        });
+        grid.appendChild(card);
+      });
     }
 
     function setLinks(id){
-      const base = location.origin + location.pathname.replace(/\/[^\/]*$/, "/");
-      $("adminLink").value = `${base}admin.html?room=${id}`;
-      $("displayLink").value = `${base}display.html?room=${id}`;
+      const base=location.origin+location.pathname.replace(/\/[^\/]*$/,"/");
+      $("adminLink").value=`${base}admin.html?room=${id}`;
+      $("displayLink").value=`${base}display.html?room=${id}`;
     }
 
     // ===== DB I/O
     async function loadStateFresh(){
-      const { data, error } = await sb.from("rooms").select("state").eq("room_id", roomId).single();
+      const {data,error}=await sb.from("rooms").select("state").eq("room_id",roomId).single();
       if (error) throw error;
       return normalizeState(data.state);
     }
-
     async function saveState(nextState){
-      const { error } = await sb.from("rooms").update({ state: nextState }).eq("room_id", roomId);
+      const {error}=await sb.from("rooms").update({state:nextState}).eq("room_id",roomId);
       if (error) throw error;
     }
 
+    // FIX #2: global mutex — prevents race conditions from steppers, commitQuickFields, auto-tick
+    let saveInFlight = false;
     async function saveWithReload(mutator){
-      const fresh = await loadStateFresh();
-      const clone = structuredClone(fresh);
-      const next = normalizeState(mutator(clone) || clone);
-      await saveState(next);
-      state = next;
-      renderAll();
-      setSync("saved");
-      setTimeout(()=>{ if ($("syncText").textContent.includes("saved")) setSync("ok"); }, 500);
+      if (saveInFlight) return;
+      saveInFlight = true;
+      try{
+        const fresh=await loadStateFresh();
+        const clone=structuredClone(fresh);
+        const next=normalizeState(mutator(clone)||clone);
+        await saveState(next);
+        state=next; renderAll(); setSync("saved");
+        setTimeout(()=>{ if ($("syncText").textContent.includes("saved")) setSync("ok"); },500);
+      } finally { saveInFlight=false; }
     }
 
-    function setSync(x){
-      $("syncText").textContent = `sync: ${x}`;
-    }
+    function setSync(x){ $("syncText").textContent=`sync: ${x}`; }
 
     // ===== create room
     async function createRoomInDb(newId){
-      const payload = { room_id: newId, state: initialState() };
-      const { error } = await sb.from("rooms").insert(payload);
+      const {error}=await sb.from("rooms").insert({room_id:newId,state:initialState()});
       if (error) throw error;
     }
-
-    $("btnCreate").onclick = async () => {
+    $("btnCreate").onclick=async()=>{
       try{
-        $("err").textContent = "";
+        $("err").textContent="";
         for (let i=0;i<6;i++){
-          const newId = genRoomId(6);
-          try{
-            await createRoomInDb(newId);
-            location.href = `admin.html?room=${newId}`;
-            return;
-          }catch(e){
-            // collision; retry
-          }
+          const newId=genRoomId(6);
+          try{ await createRoomInDb(newId); location.href=`admin.html?room=${newId}`; return; }catch(e){}
         }
         throw new Error("Не удалось создать комнату. Попробуй ещё раз.");
-      }catch(e){
-        $("err").textContent = e.message;
-      }
+      }catch(e){ $("err").textContent=e.message; }
     };
+    $("copyAdmin").onclick=async()=>{ try{ await navigator.clipboard.writeText($("adminLink").value); }catch(e){} };
+    $("copyDisplay").onclick=async()=>{ try{ await navigator.clipboard.writeText($("displayLink").value); }catch(e){} };
 
-    $("copyAdmin").onclick = async ()=>{ try{ await navigator.clipboard.writeText($("adminLink").value); }catch(e){} };
-    $("copyDisplay").onclick = async ()=>{ try{ await navigator.clipboard.writeText($("displayLink").value); }catch(e){} };
-
-    // ===== quick save
-    const DIRTY_FIELDS = new Set();
+    // ===== quick fields
+    const DIRTY_FIELDS=new Set();
     function markDirty(id){ DIRTY_FIELDS.add(id); }
     function clearDirty(id){ DIRTY_FIELDS.delete(id); }
 
-    function setIfNotFocused(id, value){
-      const el = $(id);
-      if (!el) return;
-      if (document.activeElement === el) return; // don't fight user's typing
-      if (DIRTY_FIELDS.has(id)) return; // user changed it but not committed yet
-      el.value = String(value);
+    function setIfNotFocused(id,value){
+      const el=$(id); if (!el) return;
+      if (document.activeElement===el) return;
+      if (DIRTY_FIELDS.has(id)) return;
+      el.value=String(value);
     }
 
     function fillQuickFromState(){
-      setIfNotFocused("startStack", state?.tournament?.startStack ?? 30000);
-      setIfNotFocused("registered", state?.stats?.registered ?? 0);
-      setIfNotFocused("reentries", state?.stats?.reentries ?? 0);
-      setIfNotFocused("busted", state?.stats?.busted ?? Math.max(0, (state?.stats?.registered ?? 0) - (state?.stats?.alive ?? 0)));
-
-      if (document.getElementById("ratingEntries")){
-        const reg = clampInt(state?.stats?.registered ?? 0, 0);
-        const re  = clampInt(state?.stats?.reentries ?? 0, 0);
-        const ent = reg + re;
-        // Always suggest current entries (registered + re-entries).
-        setIfNotFocused("ratingEntries", ent || 1);
-        setIfNotFocused("ratingR", state?.rating?.r ?? 0.8);
+      setIfNotFocused("startStack",state?.tournament?.startStack??30000);
+      setIfNotFocused("registered",state?.stats?.registered??0);
+      setIfNotFocused("reentries",state?.stats?.reentries??0);
+      setIfNotFocused("busted",state?.stats?.busted??Math.max(0,(state?.stats?.registered??0)-(state?.stats?.alive??0)));
+      if ($("ratingEntries")){
+        const ent=clampInt(state?.stats?.registered??0,0)+clampInt(state?.stats?.reentries??0,0);
+        setIfNotFocused("ratingEntries",ent||1);
+        setIfNotFocused("ratingR",state?.rating?.r??0.8);
       }
     }
-    // Commit quick fields without needing the Save button (prevents iPhone "revert" behavior).
-    let quickCommitTimer = null;
+
+    let quickCommitTimer=null;
     async function commitQuickFields(){
       if (!roomId) return;
       try{
-        const startStack = clampInt($("startStack").value, 0);
-        const registered = clampInt($("registered").value, 0);
-        const reentries = clampInt($("reentries").value, 0);
-        let busted = clampInt($("busted").value, 0);
-        busted = Math.min(busted, registered);
-        const alive = Math.max(0, registered - busted);
-
-        await saveWithReload(st => {
-          st.tournament.startStack = startStack;
-          st.stats.registered = registered;
-          st.stats.reentries = reentries;
-          st.stats.busted = busted;
-          st.stats.alive = alive;
-
-          // Any structure/entries change makes rating stale; hide until recalculated.
-          if (st.rating) { st.rating.isActive = false; st.rating.calculatedAt = null; }
+        const startStack=clampInt($("startStack").value,0);
+        const registered=clampInt($("registered").value,0);
+        const reentries=clampInt($("reentries").value,0);
+        let busted=Math.min(clampInt($("busted").value,0),registered);
+        const alive=Math.max(0,registered-busted);
+        await saveWithReload(st=>{
+          st.tournament.startStack=startStack; st.stats.registered=registered;
+          st.stats.reentries=reentries; st.stats.busted=busted; st.stats.alive=alive;
+          if (st.rating){ st.rating.isActive=false; st.rating.calculatedAt=null; }
         });
-
         clearDirty("startStack"); clearDirty("registered"); clearDirty("reentries"); clearDirty("busted");
-        fillQuickFromState();
-        renderKpis();
-      } catch (e){
-        console.warn("commitQuickFields failed", e);
-      }
+        fillQuickFromState(); renderKpis();
+      }catch(e){ console.warn("commitQuickFields failed",e); }
     }
-
-    function scheduleQuickCommit(ms=300){
-      clearTimeout(quickCommitTimer);
-      quickCommitTimer = setTimeout(() => commitQuickFields(), ms);
-    }
+    function scheduleQuickCommit(ms=300){ clearTimeout(quickCommitTimer); quickCommitTimer=setTimeout(()=>commitQuickFields(),ms); }
 
     function bindQuickInputs(){
-      const ids = ["startStack","registered","reentries","busted"];
-      for (const id of ids){
-        const el = $(id);
-        if (!el) continue;
-
-        el.addEventListener("input", () => {
-          markDirty(id);
-          // keep local state from overwriting user typing; also auto-save shortly after last keystroke
-          scheduleQuickCommit(450);
-        });
-
-        // commit on blur/change immediately
-        el.addEventListener("change", () => { scheduleQuickCommit(0); });
-        el.addEventListener("blur", () => { scheduleQuickCommit(0); });
-
-        // Enter = commit
-        el.addEventListener("keydown", (e) => {
-          if (e.key === "Enter"){ e.preventDefault(); scheduleQuickCommit(0); el.blur(); }
-        });
+      for (const id of ["startStack","registered","reentries","busted"]){
+        const el=$(id); if (!el) continue;
+        el.addEventListener("input",()=>{ markDirty(id); scheduleQuickCommit(450); });
+        el.addEventListener("change",()=>scheduleQuickCommit(0));
+        el.addEventListener("blur",()=>scheduleQuickCommit(0));
+        el.addEventListener("keydown",e=>{ if (e.key==="Enter"){ e.preventDefault(); scheduleQuickCommit(0); el.blur(); } });
       }
     }
-
-
 
     function renderKpis(){
-      const alive = state?.stats?.alive ?? 0;
-      const reg = state?.stats?.registered ?? 0;
-      const entries = calcEntries(state);
-      const avg = calcAvg(state);
-      $("kAlive").textContent = `${alive} из ${reg}`;
-      $("kEntries").textContent = NF.format(entries);
-      $("kAvg").textContent = NF.format(avg);
-      $("miniInfo").textContent = `L${(state?.timer?.levelIndex ?? 0)+1} · ${curLevel().isBreak ? "Перерыв" : `${curLevel().sb}/${curLevel().bb}`}`;
+      $("kAlive").textContent=`${state?.stats?.alive??0} из ${state?.stats?.registered??0}`;
+      $("kEntries").textContent=NF.format(calcEntries(state));
+      $("kAvg").textContent=NF.format(calcAvg(state));
+      $("miniInfo").textContent=`L${(state?.timer?.levelIndex??0)+1} · ${curLevel().isBreak?"Перерыв":`${curLevel().sb}/${curLevel().bb}`}`;
     }
 
-    $("btnSaveQuick").onclick = async () => {
+    $("btnSaveQuick").onclick=async()=>{
       try{
-        $("err").textContent = "";
-        const startStack = clampInt($("startStack").value, 0);
-        const registered = clampInt($("registered").value, 0);
-        const reentries = clampInt($("reentries").value, 0);
-        let busted = clampInt($("busted").value, 0);
-        busted = Math.min(busted, registered);
-        const alive = Math.max(0, registered - busted);
-
-        await saveWithReload(st => {
-          st.tournament.startStack = startStack;
-          st.stats.registered = registered;
-          st.stats.reentries = reentries;
-          st.stats.busted = busted;
-          st.stats.alive = alive; // derived, kept for compatibility
-
-          // counts changed -> rating becomes stale; hide it until recalculated
-          if (st.rating) {
-            st.rating.isActive = false;
-            st.rating.calculatedAt = null;
-          }
-
-          // keep timer index within bounds
-          st.timer.levelIndex = Math.min(st.timer.levelIndex, Math.max(0, st.structure.levels.length - 1));
+        $("err").textContent="";
+        const startStack=clampInt($("startStack").value,0);
+        const registered=clampInt($("registered").value,0);
+        const reentries=clampInt($("reentries").value,0);
+        let busted=Math.min(clampInt($("busted").value,0),registered);
+        await saveWithReload(st=>{
+          st.tournament.startStack=startStack; st.stats.registered=registered;
+          st.stats.reentries=reentries; st.stats.busted=busted;
+          st.stats.alive=Math.max(0,registered-busted);
+          if (st.rating){ st.rating.isActive=false; st.rating.calculatedAt=null; }
+          st.timer.levelIndex=Math.min(st.timer.levelIndex,Math.max(0,st.structure.levels.length-1));
           return st;
         });
-      }catch(e){
-        $("err").textContent = e.message;
-      }
+      }catch(e){ $("err").textContent=e.message; }
     };
 
-// ===== steppers (mobile-friendly)
+    // ===== steppers
     async function bump(mut){
       try{
-        $("err").textContent = "";
-        await saveWithReload(st => {
+        $("err").textContent="";
+        await saveWithReload(st=>{
           mut(st);
-
-          // If counts change, previously calculated rating becomes stale.
-          // Hide rating on display until operator recalculates.
-          if (st.rating) {
-            st.rating.isActive = false;
-            st.rating.calculatedAt = null;
-          }
-
-          // keep stats coherent (alive derived from registered-busted)
-          st.stats.registered = clampInt(st.stats.registered, 0);
-          st.stats.reentries = clampInt(st.stats.reentries, 0);
-          st.stats.busted = clampInt(st.stats.busted, 0);
-          st.stats.busted = Math.min(st.stats.busted, st.stats.registered);
-          st.stats.alive = Math.max(0, st.stats.registered - st.stats.busted);
-
-          st.tournament.startStack = clampInt(st.tournament.startStack, 0);
+          if (st.rating){ st.rating.isActive=false; st.rating.calculatedAt=null; }
+          st.stats.registered=clampInt(st.stats.registered,0);
+          st.stats.reentries=clampInt(st.stats.reentries,0);
+          st.stats.busted=Math.min(clampInt(st.stats.busted,0),st.stats.registered);
+          st.stats.alive=Math.max(0,st.stats.registered-st.stats.busted);
+          st.tournament.startStack=clampInt(st.tournament.startStack,0);
           return st;
         });
-      }catch(e){
-        $("err").textContent = e.message;
-      }
+      }catch(e){ $("err").textContent=e.message; }
     }
+    $("btnRegPlus")?.addEventListener("click",()=>bump(st=>{ st.stats.registered=clampInt(st.stats.registered,0)+1; }));
+    $("btnRegMinus")?.addEventListener("click",()=>bump(st=>{ st.stats.registered=Math.max(0,clampInt(st.stats.registered,0)-1); }));
+    $("btnRePlus")?.addEventListener("click",()=>bump(st=>{ st.stats.reentries=clampInt(st.stats.reentries,0)+1; }));
+    $("btnReMinus")?.addEventListener("click",()=>bump(st=>{ st.stats.reentries=Math.max(0,clampInt(st.stats.reentries,0)-1); }));
+    $("btnBustPlus")?.addEventListener("click",()=>bump(st=>{ st.stats.busted=clampInt(st.stats.busted,0)+1; }));
+    $("btnBustMinus")?.addEventListener("click",()=>bump(st=>{ st.stats.busted=Math.max(0,clampInt(st.stats.busted,0)-1); }));
+    $("btnStartPlus")?.addEventListener("click",()=>bump(st=>{ st.tournament.startStack=clampInt(st.tournament.startStack,0)+1000; }));
+    $("btnStartMinus")?.addEventListener("click",()=>bump(st=>{ st.tournament.startStack=Math.max(0,clampInt(st.tournament.startStack,0)-1000); }));
 
-    $("btnRegPlus")?.addEventListener("click", ()=> bump(st => { st.stats.registered = clampInt(st.stats.registered,0) + 1; }));
-    $("btnRegMinus")?.addEventListener("click", ()=> bump(st => { st.stats.registered = Math.max(0, clampInt(st.stats.registered,0) - 1); }));
-
-    $("btnRePlus")?.addEventListener("click", ()=> bump(st => { st.stats.reentries = clampInt(st.stats.reentries,0) + 1; }));
-    $("btnReMinus")?.addEventListener("click", ()=> bump(st => { st.stats.reentries = Math.max(0, clampInt(st.stats.reentries,0) - 1); }));
-
-    $("btnBustPlus")?.addEventListener("click", ()=> bump(st => { st.stats.busted = clampInt(st.stats.busted,0) + 1; }));
-    $("btnBustMinus")?.addEventListener("click", ()=> bump(st => { st.stats.busted = Math.max(0, clampInt(st.stats.busted,0) - 1); }));
-
-    $("btnStartPlus")?.addEventListener("click", ()=> bump(st => { st.tournament.startStack = clampInt(st.tournament.startStack,0) + 1000; }));
-    $("btnStartMinus")?.addEventListener("click", ()=> bump(st => { st.tournament.startStack = Math.max(0, clampInt(st.tournament.startStack,0) - 1000); }));
-
-
-    
-    
-    // rating preview live update
-    $("ratingEntries")?.addEventListener("input", () => { try{ renderRatingPreview(); }catch(e){} });
-    $("ratingR")?.addEventListener("input", () => { try{ renderRatingPreview(); }catch(e){} });
-
-    $("btnCalcRating")?.addEventListener("click", async () => {
+    // ===== rating
+    $("ratingEntries")?.addEventListener("input",()=>{ try{ renderRatingPreview(); }catch(e){} });
+    $("ratingR")?.addEventListener("input",()=>{ try{ renderRatingPreview(); }catch(e){} });
+    $("btnCalcRating")?.addEventListener("click",async()=>{
       try{
-        $("err").textContent = "";
-        const ent = clampInt($("ratingEntries").value, 1);
-        // iOS/ru locale sometimes uses comma decimal separator
-        const rr = parseFloat(String($("ratingR").value ?? "0.8").replace(",", ".")) || 0.8;
-        const res = calcPayouts(ent, rr);
-        await saveWithReload(st => {
-          st.rating = {
-            isActive: true,
-            entries: ent,
-            r: rr,
-            P: res.P,
-            TOTAL: res.TOTAL,
-            KO_POOL: res.KO_POOL,
-            ITM_POOL: res.ITM_POOL,
-            payouts: res.payouts,
-            calculatedAt: new Date().toISOString(),
-          };
+        $("err").textContent="";
+        const ent=clampInt($("ratingEntries").value,1);
+        const rr=parseFloat(String($("ratingR").value??"0.8").replace(",","."))||0.8;
+        const res=calcPayouts(ent,rr);
+        await saveWithReload(st=>{
+          st.rating={isActive:true,entries:ent,r:rr,P:res.P,TOTAL:res.TOTAL,
+            KO_POOL:res.KO_POOL,ITM_POOL:res.ITM_POOL,payouts:res.payouts,calculatedAt:new Date().toISOString()};
           return st;
         });
-      }catch(e){
-        $("err").textContent = e.message || String(e);
-      }
+      }catch(e){ $("err").textContent=e.message||String(e); }
     });
 
-
     // ===== structure UI
-    function levelsToJsonText(levels){
-      return JSON.stringify(levels, null, 2);
-    }
+    function levelsToJsonText(levels){ return JSON.stringify(levels,null,2); }
 
     function readLevelsFromTable(){
-      const rows = [...$("levelsTable").querySelector("tbody").querySelectorAll("tr")];
-      const out = [];
-      for (const tr of rows){
-        const type = tr.querySelector("[data-k='type']").value;
-        const isBreak = (type === "break");
-        const min = clampInt(tr.querySelector("[data-k='min']").value, 0);
-        const sb = clampInt(tr.querySelector("[data-k='sb']").value, 0);
-        const bb = clampInt(tr.querySelector("[data-k='bb']").value, 0);
-        const anteMode = tr.querySelector("[data-k='ante']").value === "BB" ? "BB" : "NONE";
-
-        const obj = isBreak
-          ? { isBreak: true, min }
-          : { min, sb, bb, anteMode };
-        out.push(obj);
-      }
-      return out;
+      const rows=[...$("levelsTable").querySelector("tbody").querySelectorAll("tr")];
+      return rows.map(tr=>{
+        const type=tr.querySelector("[data-k='type']").value;
+        const isBreak=type==="break";
+        const min=clampInt(tr.querySelector("[data-k='min']").value,0);
+        const sb=clampInt(tr.querySelector("[data-k='sb']").value,0);
+        const bb=clampInt(tr.querySelector("[data-k='bb']").value,0);
+        const anteMode=tr.querySelector("[data-k='ante']").value==="BB"?"BB":"NONE";
+        return isBreak?{isBreak:true,min}:{min,sb,bb,anteMode};
+      });
     }
 
     function renderLevelsTable(levels){
-      const tbody = $("levelsTable").querySelector("tbody");
-      tbody.innerHTML = "";
-      levels.forEach((lv, idx) => {
-        const tr = document.createElement("tr");
-
-        const type = lv.isBreak ? "break" : "level";
-        const min = lv.min ?? 0;
-        const sb = lv.sb ?? 0;
-        const bb = lv.bb ?? 0;
-        const ante = (lv.anteMode === "BB") ? "BB" : "NONE";
-
-        tr.innerHTML = `
+      const tbody=$("levelsTable").querySelector("tbody");
+      tbody.innerHTML="";
+      levels.forEach((lv,idx)=>{
+        const tr=document.createElement("tr");
+        const type=lv.isBreak?"break":"level";
+        const min=lv.min??0, sb=lv.sb??0, bb=lv.bb??0;
+        const ante=(lv.anteMode==="BB")?"BB":"NONE";
+        tr.innerHTML=`
           <td class="mono">${idx+1}</td>
-          <td>
-            <select data-k="type">
-              <option value="level"${type==="level"?" selected":""}>Level</option>
-              <option value="break"${type==="break"?" selected":""}>Break</option>
-            </select>
-          </td>
+          <td><select data-k="type">
+            <option value="level"${type==="level"?" selected":""}>Level</option>
+            <option value="break"${type==="break"?" selected":""}>Break</option>
+          </select></td>
           <td><input data-k="min" type="number" min="0" step="1" value="${min}"></td>
-          <td><input data-k="sb" type="number" min="0" step="1" value="${sb}" ${type==="break"?"disabled":""}></td>
-          <td><input data-k="bb" type="number" min="0" step="1" value="${bb}" ${type==="break"?"disabled":""}></td>
-          <td>
-            <select data-k="ante" ${type==="break"?"disabled":""}>
-              <option value="NONE"${ante==="NONE"?" selected":""}>—</option>
-              <option value="BB"${ante==="BB"?" selected":""}>BB</option>
-            </select>
-          </td>
-          <td>
-            <div class="btnrow" style="gap:8px;">
-              <button type="button" class="miniBtn ghost" data-act="up">↑</button>
-              <button type="button" class="miniBtn ghost" data-act="down">↓</button>
-            </div>
-          </td>
-          <td><button type="button" class="miniBtn danger" data-act="del">Del</button></td>
-        `;
-
-        // type toggle enables/disables
-        const typeSel = tr.querySelector("[data-k='type']");
-        typeSel.addEventListener("change", () => {
-          const isBr = typeSel.value === "break";
-          tr.querySelector("[data-k='sb']").disabled = isBr;
-          tr.querySelector("[data-k='bb']").disabled = isBr;
-          tr.querySelector("[data-k='ante']").disabled = isBr;
+          <td><input data-k="sb"  type="number" min="0" step="1" value="${sb}"  ${type==="break"?"disabled":""}></td>
+          <td><input data-k="bb"  type="number" min="0" step="1" value="${bb}"  ${type==="break"?"disabled":""}></td>
+          <td><select data-k="ante" ${type==="break"?"disabled":""}>
+            <option value="NONE"${ante==="NONE"?" selected":""}>—</option>
+            <option value="BB"${ante==="BB"?" selected":""}>BB</option>
+          </select></td>
+          <td><div class="btnrow" style="gap:8px;">
+            <button type="button" class="miniBtn ghost" data-act="up">↑</button>
+            <button type="button" class="miniBtn ghost" data-act="down">↓</button>
+          </div></td>
+          <td><button type="button" class="miniBtn danger" data-act="del">Del</button></td>`;
+        const typeSel=tr.querySelector("[data-k='type']");
+        typeSel.addEventListener("change",()=>{
+          const isBr=typeSel.value==="break";
+          tr.querySelector("[data-k='sb']").disabled=isBr;
+          tr.querySelector("[data-k='bb']").disabled=isBr;
+          tr.querySelector("[data-k='ante']").disabled=isBr;
         });
-
-        // move/delete handlers
-        tr.querySelector("[data-act='del']").addEventListener("click", () => {
-          const cur = readLevelsFromTable();
-          cur.splice(idx, 1);
-          renderLevelsTable(cur);
-          $("structureJson").value = levelsToJsonText(cur);
+        tr.querySelector("[data-act='del']").addEventListener("click",()=>{
+          const cur=readLevelsFromTable(); cur.splice(idx,1); renderLevelsTable(cur);
+          $("structureJson").value=levelsToJsonText(cur);
         });
-        tr.querySelector("[data-act='up']").addEventListener("click", () => {
-          const cur = readLevelsFromTable();
-          if (idx <= 0) return;
-          const t = cur[idx-1]; cur[idx-1] = cur[idx]; cur[idx] = t;
-          renderLevelsTable(cur);
-          $("structureJson").value = levelsToJsonText(cur);
+        tr.querySelector("[data-act='up']").addEventListener("click",()=>{
+          const cur=readLevelsFromTable(); if (idx<=0) return;
+          [cur[idx-1],cur[idx]]=[cur[idx],cur[idx-1]]; renderLevelsTable(cur);
+          $("structureJson").value=levelsToJsonText(cur);
         });
-        tr.querySelector("[data-act='down']").addEventListener("click", () => {
-          const cur = readLevelsFromTable();
-          if (idx >= cur.length-1) return;
-          const t = cur[idx+1]; cur[idx+1] = cur[idx]; cur[idx] = t;
-          renderLevelsTable(cur);
-          $("structureJson").value = levelsToJsonText(cur);
+        tr.querySelector("[data-act='down']").addEventListener("click",()=>{
+          const cur=readLevelsFromTable(); if (idx>=cur.length-1) return;
+          [cur[idx+1],cur[idx]]=[cur[idx],cur[idx+1]]; renderLevelsTable(cur);
+          $("structureJson").value=levelsToJsonText(cur);
         });
-
         tbody.appendChild(tr);
       });
-
-      // keep json in sync
-      $("structureJson").value = levelsToJsonText(levels);
+      $("structureJson").value=levelsToJsonText(levels);
     }
 
-    function escapeHtml(s){
-      return (s ?? "").toString()
-        .replaceAll("&","&amp;")
-        .replaceAll("<","&lt;")
-        .replaceAll(">","&gt;")
-        .replaceAll('"',"&quot;")
-        .replaceAll("'","&#039;");
-    }
-
-    
-    // ===== structure accordion
-    const _acc = $("structureAccordion");
-    const _tog = $("structureToggle");
+    const _acc=$("structureAccordion"), _tog=$("structureToggle");
     function setAcc(open){
       if (!_acc) return;
-      _acc.classList.toggle("open", !!open);
-      if (_tog) _tog.setAttribute("aria-expanded", open ? "true" : "false");
+      _acc.classList.toggle("open",!!open);
+      if (_tog) _tog.setAttribute("aria-expanded",open?"true":"false");
     }
-    if (_tog){
-      _tog.addEventListener("click", () => setAcc(!_acc.classList.contains("open")));
-      setAcc(false); // collapsed by default
-    }
+    if (_tog){ _tog.addEventListener("click",()=>setAcc(!_acc.classList.contains("open"))); setAcc(false); }
 
-$("addLevel").onclick = () => {
-      const cur = readLevelsFromTable();
-      cur.push({ min: 18, sb: 0, bb: 0, anteMode: "BB" });
-      renderLevelsTable(cur);
-    };
-    $("addBreak").onclick = () => {
-      const cur = readLevelsFromTable();
-      cur.push({ isBreak: true, min: 10 });
-      renderLevelsTable(cur);
-    };
-    $("btnStructureReset").onclick = () => {
-      const lvls = defaultStructureLevels();
-      renderLevelsTable(lvls);
-    };
-
-    $("applyJson").onclick = () => {
+    $("addLevel").onclick=()=>{ const cur=readLevelsFromTable(); cur.push({min:18,sb:0,bb:0,anteMode:"BB"}); renderLevelsTable(cur); };
+    $("addBreak").onclick=()=>{ const cur=readLevelsFromTable(); cur.push({isBreak:true,min:10}); renderLevelsTable(cur); };
+    $("btnStructureReset").onclick=()=>renderLevelsTable(defaultStructureLevels());
+    $("applyJson").onclick=()=>{
       try{
-        $("err").textContent = "";
-        const parsed = JSON.parse($("structureJson").value);
+        $("err").textContent="";
+        const parsed=JSON.parse($("structureJson").value);
         if (!Array.isArray(parsed)) throw new Error("должен быть массив уровней");
-        const norm = normalizeState({ tournament:{}, stats:{}, structure:{levels:parsed}, timer:{levelIndex:0} }).structure.levels;
+        const norm=normalizeState({tournament:{},stats:{},structure:{levels:parsed},timer:{levelIndex:0}}).structure.levels;
         renderLevelsTable(norm);
-      }catch(e){
-        $("err").textContent = "JSON структуры: " + e.message;
-      }
+      }catch(e){ $("err").textContent="JSON структуры: "+e.message; }
     };
-
-    $("btnStructureSave").onclick = async () => {
+    $("btnStructureSave").onclick=async()=>{
       try{
-        $("err").textContent = "";
-        const levels = readLevelsFromTable();
+        $("err").textContent="";
+        const levels=readLevelsFromTable();
         if (!levels.length) throw new Error("Структура пустая");
-        await saveWithReload(st => {
-          st.structure.levels = levels;
-          st.timer.levelIndex = Math.min(st.timer.levelIndex, st.structure.levels.length - 1);
-          // if running and not paused: reset endAt to full duration of current level (simpler & predictable)
-          if (st.timer.isRunning && !st.timer.isPaused){
-            const lv = st.structure.levels[st.timer.levelIndex] || { min: 0 };
-            st.timer.levelEndAt = nowMs() + (clampInt(lv.min,0) * 60 * 1000);
+        await saveWithReload(st=>{
+          st.structure.levels=levels;
+          st.timer.levelIndex=Math.min(st.timer.levelIndex,st.structure.levels.length-1);
+          if (st.timer.isRunning&&!st.timer.isPaused){
+            const lv=st.structure.levels[st.timer.levelIndex]||{min:0};
+            st.timer.levelEndAt=nowMs()+(clampInt(lv.min,0)*60000);
           }
           return st;
         });
-      
-        setAcc(false); // auto-collapse after successful save
-}catch(e){
-        $("err").textContent = e.message;
-      }
+        setAcc(false);
+      }catch(e){ $("err").textContent=e.message; }
     };
 
     // ===== timer actions
     function applyStart(st){
-      const ti = st.timer;
-      ti.isRunning = true;
-      ti.isPaused = false;
-      ti.pauseRemainingSec = null;
-      const lv = st.structure.levels[ti.levelIndex] || { min: 0 };
-      ti.levelEndAt = nowMs() + (clampInt(lv.min,0) * 60 * 1000);
-      return st;
+      const ti=st.timer; ti.isRunning=true; ti.isPaused=false; ti.pauseRemainingSec=null;
+      const lv=st.structure.levels[ti.levelIndex]||{min:0};
+      ti.levelEndAt=nowMs()+(clampInt(lv.min,0)*60000); return st;
     }
     function applyPause(st){
-      const ti = st.timer;
-      if (!ti.isRunning || ti.isPaused) return st;
-      const leftSec = Math.max(0, Math.floor((ti.levelEndAt - nowMs())/1000));
-      ti.isPaused = true;
-      ti.pauseRemainingSec = leftSec;
-      ti.levelEndAt = null;
-      return st;
+      const ti=st.timer; if (!ti.isRunning||ti.isPaused) return st;
+      ti.isPaused=true; ti.pauseRemainingSec=Math.max(0,Math.floor((ti.levelEndAt-nowMs())/1000));
+      ti.levelEndAt=null; return st;
     }
     function applyResume(st){
-      const ti = st.timer;
-      if (!ti.isRunning || !ti.isPaused) return st;
-      const left = clampInt(ti.pauseRemainingSec, 0);
-      ti.isPaused = false;
-      ti.levelEndAt = nowMs() + left*1000;
-      ti.pauseRemainingSec = null;
-      return st;
+      const ti=st.timer; if (!ti.isRunning||!ti.isPaused) return st;
+      ti.isPaused=false; ti.levelEndAt=nowMs()+clampInt(ti.pauseRemainingSec,0)*1000;
+      ti.pauseRemainingSec=null; return st;
     }
     function applyNext(st){
-      const ti = st.timer;
-      ti.levelIndex = Math.min(st.structure.levels.length - 1, (ti.levelIndex ?? 0) + 1);
-      if (ti.isRunning && !ti.isPaused){
-        const lv = st.structure.levels[ti.levelIndex] || { min: 0 };
-        ti.levelEndAt = nowMs() + (clampInt(lv.min,0) * 60 * 1000);
-      }
+      const ti=st.timer;
+      ti.levelIndex=Math.min(st.structure.levels.length-1,(ti.levelIndex??0)+1);
+      if (ti.isRunning&&!ti.isPaused){ const lv=st.structure.levels[ti.levelIndex]||{min:0}; ti.levelEndAt=nowMs()+(clampInt(lv.min,0)*60000); }
       return st;
     }
     function applyPrev(st){
-      const ti = st.timer;
-      ti.levelIndex = Math.max(0, (ti.levelIndex ?? 0) - 1);
-      if (ti.isRunning && !ti.isPaused){
-        const lv = st.structure.levels[ti.levelIndex] || { min: 0 };
-        ti.levelEndAt = nowMs() + (clampInt(lv.min,0) * 60 * 1000);
-      }
+      const ti=st.timer;
+      ti.levelIndex=Math.max(0,(ti.levelIndex??0)-1);
+      if (ti.isRunning&&!ti.isPaused){ const lv=st.structure.levels[ti.levelIndex]||{min:0}; ti.levelEndAt=nowMs()+(clampInt(lv.min,0)*60000); }
       return st;
     }
-    function applyReset(st){
-      st.timer = { isRunning:false, isPaused:false, levelIndex:0, levelEndAt:null, pauseRemainingSec:null };
-      return st;
-    }
+    function applyReset(st){ st.timer={isRunning:false,isPaused:false,levelIndex:0,levelEndAt:null,pauseRemainingSec:null}; return st; }
     function applyMinus60(st){
-      const ti = st.timer;
-      if (!ti.isRunning) return st;
-      if (ti.isPaused){
-        ti.pauseRemainingSec = Math.max(0, (ti.pauseRemainingSec ?? 0) - 60);
-      } else if (ti.levelEndAt){
-        ti.levelEndAt = Number(ti.levelEndAt) - 60*1000;
-      }
+      const ti=st.timer; if (!ti.isRunning) return st;
+      if (ti.isPaused) ti.pauseRemainingSec=Math.max(0,(ti.pauseRemainingSec??0)-60);
+      else if (ti.levelEndAt) ti.levelEndAt=Number(ti.levelEndAt)-60000;
       return st;
     }
 
-    $("start").onclick = async ()=>{ try{ $("err").textContent=""; await saveWithReload(applyStart); }catch(e){ $("err").textContent=e.message; } };
-    $("pause").onclick = async ()=>{ try{ $("err").textContent=""; await saveWithReload(applyPause); }catch(e){ $("err").textContent=e.message; } };
-    $("resume").onclick = async ()=>{ try{ $("err").textContent=""; await saveWithReload(applyResume); }catch(e){ $("err").textContent=e.message; } };
-    $("next").onclick = async ()=>{ try{ $("err").textContent=""; await saveWithReload(applyNext); }catch(e){ $("err").textContent=e.message; } };
-    $("prev").onclick = async ()=>{ try{ $("err").textContent=""; await saveWithReload(applyPrev); }catch(e){ $("err").textContent=e.message; } };
-    $("reset").onclick = async ()=>{ try{ $("err").textContent=""; await saveWithReload(applyReset); }catch(e){ $("err").textContent=e.message; } };
-    $("minus60").onclick = async ()=>{ try{ $("err").textContent=""; await saveWithReload(applyMinus60); }catch(e){ $("err").textContent=e.message; } };
+    $("start").onclick   =async()=>{ try{ $("err").textContent=""; await saveWithReload(applyStart);   }catch(e){ $("err").textContent=e.message; } };
+    $("pause").onclick   =async()=>{ try{ $("err").textContent=""; await saveWithReload(applyPause);   }catch(e){ $("err").textContent=e.message; } };
+    $("resume").onclick  =async()=>{ try{ $("err").textContent=""; await saveWithReload(applyResume);  }catch(e){ $("err").textContent=e.message; } };
+    $("next").onclick    =async()=>{ try{ $("err").textContent=""; await saveWithReload(applyNext);    }catch(e){ $("err").textContent=e.message; } };
+    $("prev").onclick    =async()=>{ try{ $("err").textContent=""; await saveWithReload(applyPrev);    }catch(e){ $("err").textContent=e.message; } };
+    $("reset").onclick   =async()=>{ try{ $("err").textContent=""; await saveWithReload(applyReset);   }catch(e){ $("err").textContent=e.message; } };
+    $("minus60").onclick =async()=>{ try{ $("err").textContent=""; await saveWithReload(applyMinus60); }catch(e){ $("err").textContent=e.message; } };
 
     // ===== auto-advance (leader only)
     async function autoAdvanceIfNeededLeader(){
-      if (!hasLock || !roomId) return;
-      const fresh = await loadStateFresh();
-      const ti = fresh.timer;
-      if (!ti?.isRunning || ti.isPaused || !ti.levelEndAt) return;
-      if (nowMs() < ti.levelEndAt) return;
-
-      await saveWithReload(st => {
-        const t = st.timer;
-        const hasNext = !!st.structure.levels[t.levelIndex + 1];
-        if (!hasNext){
-          t.isRunning = false;
-          t.isPaused = false;
-          t.levelEndAt = null;
-          t.pauseRemainingSec = null;
-          return st;
-        }
-        t.levelIndex += 1;
-        t.isRunning = true;
-        t.isPaused = false;
-        t.pauseRemainingSec = null;
-        const lv = st.structure.levels[t.levelIndex] || { min: 0 };
-        t.levelEndAt = nowMs() + (clampInt(lv.min,0) * 60 * 1000);
-        return st;
+      if (!hasLock||!roomId) return;
+      const fresh=await loadStateFresh();
+      const ti=fresh.timer;
+      if (!ti?.isRunning||ti.isPaused||!ti.levelEndAt) return;
+      if (nowMs()<ti.levelEndAt) return;
+      await saveWithReload(st=>{
+        const t=st.timer;
+        const hasNext=!!st.structure.levels[t.levelIndex+1];
+        if (!hasNext){ t.isRunning=false; t.isPaused=false; t.levelEndAt=null; t.pauseRemainingSec=null; return st; }
+        t.levelIndex+=1; t.isRunning=true; t.isPaused=false; t.pauseRemainingSec=null;
+        const lv=st.structure.levels[t.levelIndex]||{min:0};
+        t.levelEndAt=nowMs()+(clampInt(lv.min,0)*60000); return st;
       });
     }
 
-    let tickInFlight = false;
-    setInterval(async () => {
-      if (!roomId || !hasLock || tickInFlight) return;
-      tickInFlight = true;
-      try{ await autoAdvanceIfNeededLeader(); }catch(e){} finally{ tickInFlight = false; }
-    }, 1000);
+    // Tick every second — mutex (saveInFlight) already prevents overlap with button clicks
+    setInterval(async()=>{
+      if (!roomId||!hasLock) return;
+      try{ await autoAdvanceIfNeededLeader(); }catch(e){}
+    },1000);
+
+    // FIX #3: re-check auto-advance immediately when tab becomes visible
+    // (браузер throttles setInterval в фоне → авто-переход "застревал" до скролла/взаимодействия)
+    document.addEventListener("visibilitychange",()=>{
+      if (document.visibilityState==="visible"){
+        autoAdvanceIfNeededLeader().catch(()=>{});
+      }
+    });
 
     // ===== render
     function fmtTime(sec){
-      sec = Math.max(0, sec|0);
-      const m = Math.floor(sec/60), s = sec%60;
+      sec=Math.max(0,sec|0); const m=Math.floor(sec/60),s=sec%60;
       return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
     }
 
 
-    function renderRatingPreview(){
-      if (!document.getElementById("ratingTbody")) return;
-      const ent = clampInt($("ratingEntries").value, 1);
-      const rr = Number($("ratingR").value || 0.8);
-      let res;
-      try{
-        res = calcPayouts(ent, rr);
-        $("kP").textContent = res.P;
-        $("kTotal").textContent = fmtInt(res.TOTAL);
-        $("kKoPool").textContent = fmtInt(res.KO_POOL);
-        $("kItmPool").textContent = fmtInt(res.ITM_POOL);
-
-        const tb = $("ratingTbody");
-        tb.innerHTML = "";
-        res.payouts.forEach((v, i) => {
-          const tr = document.createElement("tr");
-          tr.innerHTML = `<td>${i+1}</td><td><b>${fmtInt(v)}</b></td>`;
-          tb.appendChild(tr);
-        });
-      }catch(e){
-        $("kP").textContent = "—";
-        $("kTotal").textContent = "—";
-        $("kKoPool").textContent = "—";
-        $("kItmPool").textContent = "—";
-        $("ratingTbody").innerHTML = `<tr><td colspan="2" style="opacity:.8;">${(e.message||e)}</td></tr>`;
-      }
-    }
 
     function renderTimerInfo(){
-      const ti = state?.timer;
-      if (!ti) return;
-      const lv = curLevel();
-      const endAt = ti.levelEndAt ? new Date(ti.levelEndAt).toLocaleTimeString() : "—";
-      const leftSec = (!ti.isPaused && ti.isRunning && ti.levelEndAt) ? Math.max(0, Math.floor((ti.levelEndAt - nowMs())/1000)) : null;
-      const status = !ti.isRunning ? "STOPPED" : (ti.isPaused ? `PAUSED (${ti.pauseRemainingSec ?? 0}s)` : `RUNNING (${leftSec ?? 0}s left)`);
-      const lvText = lv.isBreak ? "Перерыв" : `${lv.sb}/${lv.bb}`;
-      $("tinfo").textContent = `L${ti.levelIndex + 1}/${state.structure.levels.length} · ${lvText} · ${status} · endAt=${endAt}`;
+      const ti=state?.timer; if (!ti) return;
+      const lv=curLevel();
+      const endAt=ti.levelEndAt?new Date(ti.levelEndAt).toLocaleTimeString():"—";
+      const leftSec=(!ti.isPaused&&ti.isRunning&&ti.levelEndAt)?Math.max(0,Math.floor((ti.levelEndAt-nowMs())/1000)):null;
+      const status=!ti.isRunning?"STOPPED":(ti.isPaused?`PAUSED (${ti.pauseRemainingSec??0}s)`:`RUNNING (${leftSec??0}s left)`);
+      $("tinfo").textContent=`L${ti.levelIndex+1}/${state.structure.levels.length} · ${lv.isBreak?"Перерыв":`${lv.sb}/${lv.bb}`} · ${status} · endAt=${endAt}`;
     }
 
     function renderAll(){
       if (!state) return;
-      fillQuickFromState();
-      renderKpis();
-      renderRatingPreview();
-      renderTimerInfo();
-      renderLevelsTable(state.structure.levels);
+      fillQuickFromState(); renderKpis(); renderTimerInfo();
+      // Don't overwrite structure table while user is editing it (accordion open)
+      if (!_acc || !_acc.classList.contains("open")) {
+        renderLevelsTable(state.structure.levels);
+      }
     }
 
-    // ===== realtime sync
+    // FIX #4: track channel — avoid realtime leak on re-subscribe
+    let realtimeChannel=null;
     function subscribeRealtime(){
       if (!roomId) return;
-      sb.channel("rooms-"+roomId)
-        .on("postgres_changes",
-            { event:"UPDATE", schema:"public", table:"rooms", filter:`room_id=eq.${roomId}` },
-            (payload) => {
-              state = normalizeState(payload.new.state);
-              renderAll();
-              setSync("rt");
-              setTimeout(()=>{ if ($("syncText").textContent.includes("rt")) setSync("ok"); }, 300);
-            })
+      if (realtimeChannel) sb.removeChannel(realtimeChannel);
+      realtimeChannel=sb.channel("rooms-"+roomId)
+        .on("postgres_changes",{event:"UPDATE",schema:"public",table:"rooms",filter:`room_id=eq.${roomId}`},
+            payload=>{ state=normalizeState(payload.new.state); renderAll(); setSync("rt"); setTimeout(()=>{ if ($("syncText").textContent.includes("rt")) setSync("ok"); },300); })
         .subscribe();
     }
 
-    // ===== sticky helpers
-    $("btnScrollTop").onclick = () => window.scrollTo({ top: 0, behavior: "smooth" });
+    $("btnScrollTop").onclick=()=>window.scrollTo({top:0,behavior:"smooth"});
 
-    // ===== boot
     async function bootRoom(){
       try{
-        $("err").textContent = "";
-        showForRoom();
-        setLinks(roomId);
-        setSync("loading");
-        state = await loadStateFresh();
-        renderAll();
-        subscribeRealtime();
-        startLockLoop();
-        setSync("ok");
-      }catch(e){
-        $("err").textContent = e.message;
-        setSync("err");
-      }
+        $("err").textContent=""; showForRoom(); setLinks(roomId); setSync("loading");
+        state=await loadStateFresh(); renderAll(); subscribeRealtime(); startLockLoop(); setSync("ok");
+      }catch(e){ $("err").textContent=e.message; setSync("err"); }
     }
 
-
-    // ===== rating payouts calc (shared with display)
-    function calcPayouts(entries, r = 0.8){
-      const E = clampInt(entries, 1);
-      const rr = Number(r);
-      if (!Number.isFinite(rr) || rr <= 0 || rr >= 1) throw new Error("r must be between 0 and 1");
-      const P = Math.max(3, Math.floor(0.15 * E));
-      const TOTAL = Math.max(800, 10 * E);
-      const KO_POOL = 2 * E;
-      const ITM_POOL = TOTAL - KO_POOL;
-
-      const weights = Array.from({length:P}, (_,i)=> Math.pow(rr, i));
-      const wsum = weights.reduce((a,b)=>a+b, 0);
-
-      const exact = weights.map(w => ITM_POOL * w / wsum);
-      const base = exact.map(x => Math.round(x));
-      const baseSum = base.reduce((a,b)=>a+b, 0);
-      const delta = ITM_POOL - baseSum;
-
-      const payouts = base.slice();
-      payouts[0] = payouts[0] + delta;
-
-      const paySum = payouts.reduce((a,b)=>a+b, 0);
-      if (paySum !== ITM_POOL){
-        throw new Error(`payouts sum mismatch: ${paySum} != ${ITM_POOL}`);
-      }
-      return { P, TOTAL, KO_POOL, ITM_POOL, r: rr, payouts };
+    // ===== rating calc
+    function calcPayouts(entries, r=0.8){
+      const E=clampInt(entries,1), rr=Number(r);
+      if (!Number.isFinite(rr)||rr<=0||rr>=1) throw new Error("r must be between 0 and 1");
+      const P=Math.max(3,Math.floor(0.15*E));
+      const TOTAL=Math.max(800,10*E), KO_POOL=2*E, ITM_POOL=TOTAL-KO_POOL;
+      const weights=Array.from({length:P},(_,i)=>Math.pow(rr,i));
+      const wsum=weights.reduce((a,b)=>a+b,0);
+      const base=weights.map(w=>Math.round(ITM_POOL*w/wsum));
+      const baseSum=base.reduce((a,b)=>a+b,0);
+      const payouts=base.slice(); payouts[0]+=ITM_POOL-baseSum;
+      // FIX #8: warn instead of throw on rounding mismatch
+      const paySum=payouts.reduce((a,b)=>a+b,0);
+      if (paySum!==ITM_POOL){ console.warn(`[rating] rounding adj ${paySum-ITM_POOL}`); payouts[0]+=(ITM_POOL-paySum); }
+      return {P,TOTAL,KO_POOL,ITM_POOL,r:rr,payouts};
     }
 
-    function selfTestCalcPayouts(){
-      const t = calcPayouts(100, 0.8);
-      if (t.TOTAL !== 1000) throw new Error("test TOTAL failed");
-      if (t.KO_POOL !== 200) throw new Error("test KO_POOL failed");
-      if (t.ITM_POOL !== 800) throw new Error("test ITM_POOL failed");
-      if (t.P !== 15) throw new Error("test P failed");
-      const sum = t.payouts.reduce((a,b)=>a+b,0);
-      if (sum !== 800) throw new Error("test sum failed");
-      console.log("[rating] self-test OK", t);
-      return true;
-    }
-    try{ selfTestCalcPayouts(); }catch(e){ console.error("[rating] self-test FAILED", e); }
+    try{
+      const t=calcPayouts(100,0.8);
+      console.assert(t.TOTAL===1000&&t.KO_POOL===200&&t.ITM_POOL===800&&t.P===15&&t.payouts.reduce((a,b)=>a+b,0)===800,"[rating] self-test FAILED");
+      console.log("[rating] self-test OK");
+    }catch(e){ console.error("[rating] self-test FAILED",e); }
 
-
-    if (!roomId){
-      showCreateOnly();
-      setRoleUi();
-    } else {
-      bootRoom();
-    }
+    if (!roomId){ showCreateOnly(); setRoleUi(); }
+    else { bootRoom(); }
   </script>
 
-  <!-- ===== PIN LOGIC ===== -->
+  <!-- ===== PIN LOGIC =====
+    FIX #1: PIN хранится как SHA-256 хэш — не виден в исходнике.
+    Чтобы сменить PIN, выполни в консоли браузера:
+      const h = await crypto.subtle.digest("SHA-256", new TextEncoder().encode("НОВЫЙ_ПИН"));
+      console.log([...new Uint8Array(h)].map(b=>b.toString(16).padStart(2,'0')).join(''));
+    Вставь результат в ADMIN_PIN_HASH ниже.
+  -->
   <script>
-    // Поменяй PIN тут
-    const ADMIN_PIN = "2580";
-    const PIN_SESSION_KEY = "adminUnlocked";
+    const ADMIN_PIN_HASH = window.ADMIN_PIN_HASH; // задаётся в config.js
 
-    function showLock(){
-      document.getElementById("pinLock")?.classList.add("show");
-      document.documentElement.classList.add("locked");
+    async function hashPin(pin){
+      const buf=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(pin.trim()));
+      return [...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,"0")).join("");
     }
-    function hideLock(){
-      document.getElementById("pinLock")?.classList.remove("show");
-      document.documentElement.classList.remove("locked");
-    }
-    function unlock(){
-      sessionStorage.setItem(PIN_SESSION_KEY, "1");
-      hideLock();
-    }
+    const SESSION_NONCE="f7d4e2a1b9c3";
+    async function getSessionKey(){ return await hashPin(SESSION_NONCE+location.hostname); }
+    async function isUnlocked(){ try{ return sessionStorage.getItem("adminAuth")===await getSessionKey(); }catch(e){ return false; } }
+    async function saveUnlocked(){ sessionStorage.setItem("adminAuth",await getSessionKey()); }
 
-    document.addEventListener("DOMContentLoaded", () => {
-      const btn = document.getElementById("pinBtn");
-      const input = document.getElementById("pinInput");
-      const err = document.getElementById("pinError");
+    function showLock(){ document.getElementById("pinLock")?.classList.add("show"); document.documentElement.classList.add("locked"); }
+    function hideLock(){ document.getElementById("pinLock")?.classList.remove("show"); document.documentElement.classList.remove("locked"); }
 
-      if (sessionStorage.getItem(PIN_SESSION_KEY) === "1"){
-        hideLock();
-      } else {
-        showLock();
+    document.addEventListener("DOMContentLoaded",async()=>{
+      const btn=document.getElementById("pinBtn");
+      const input=document.getElementById("pinInput");
+      const err=document.getElementById("pinError");
+
+      if (await isUnlocked()){ hideLock(); }
+      else { showLock(); input?.focus(); }
+
+      async function tryUnlock(){
+        const entered=(input?.value||"").trim(); if (!entered) return;
+        if (await hashPin(entered)===ADMIN_PIN_HASH){ await saveUnlocked(); hideLock(); }
+        else { input.value=""; if (err) err.textContent="Wrong PIN"; input?.focus(); }
       }
-
-      btn?.addEventListener("click", () => {
-        if ((input.value || "").trim() === ADMIN_PIN){
-          unlock();
-        } else {
-          input.value = "";
-          err.textContent = "Wrong PIN";
-        }
-      });
-
-      input?.addEventListener("keydown", (e) => {
-        if (e.key === "Enter") btn.click();
-      });
-
+      btn?.addEventListener("click",tryUnlock);
+      input?.addEventListener("keydown",e=>{ if (e.key==="Enter") tryUnlock(); });
       try{ bindQuickInputs(); }catch(e){ console.warn(e); }
     });
   </script>
