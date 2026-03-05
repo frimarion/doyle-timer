@@ -329,64 +329,64 @@
           </div>
         </div>
 
-<details style="margin-top:12px;">
-  <summary>Импорт списка игроков (из Telegram)</summary>
-  <div class="sub">Вставь нумерованный список (по 1 игроку в строке). Поддерживает "1.", "1)", "1️⃣".</div>
-  <textarea id="playersImportText" spellcheck="false" style="min-height:140px;"></textarea>
-  <div class="btnrow" style="margin-top:10px;">
-    <button id="btnPlayersReplace" type="button">Заменить список</button>
-    <button id="btnPlayersAdd" type="button" class="ghost">Добавить новых</button>
-    <span class="sub mono" id="playersImportInfo" style="margin-left:auto;"></span>
-  </div>
-</details>
+        <details style="margin-top:12px;">
+          <summary>Импорт списка игроков (из Telegram)</summary>
+          <div class="sub">Вставь нумерованный список (по 1 игроку в строке). Поддерживает "1.", "1)", "1️⃣".</div>
+          <textarea id="playersImportText" spellcheck="false" style="min-height:140px;"></textarea>
+          <div class="btnrow" style="margin-top:10px;">
+            <button id="btnPlayersReplace" type="button">Заменить список</button>
+            <button id="btnPlayersAdd" type="button" class="ghost">Добавить новых</button>
+            <span class="sub mono" id="playersImportInfo" style="margin-left:auto;"></span>
+          </div>
+        </details>
 
-<details style="margin-top:12px;">
-  <summary>Игроки (быстрое управление)</summary>
-  <div class="sub">Отметь «Пришел», затем кнопка BUSTED спросит KO, отметит вылет и обновит «В игре» на дисплее.</div>
-  <div class="btnrow" style="margin-top:10px;">
-    <button id="btnPlayerPlus" type="button">+ Добавить игрока</button>
-    <span class="sub mono" id="playersQuickInfo" style="margin-left:auto;"></span>
-  </div>
-  <div id="playersTableWrap" class="tableWrap" style="margin-top:10px;">
-    <table>
-      <thead><tr><th>#</th><th>Игрок</th><th>Пришел</th><th>Re</th><th>KO</th><th>Статус</th><th>Действия</th></tr></thead>
-      <tbody id="playersTbody"></tbody>
-    </table>
-  </div>
-</details>
+        <details style="margin-top:12px;">
+          <summary>Игроки (быстрое управление)</summary>
+          <div class="sub">Отметь «Пришел», затем кнопка BUSTED спросит KO, отметит вылет и обновит «В игре» на дисплее.</div>
+          <div class="btnrow" style="margin-top:10px;">
+            <button id="btnPlayerPlus" type="button">+ Добавить игрока</button>
+            <span class="sub mono" id="playersQuickInfo" style="margin-left:auto;"></span>
+          </div>
+          <div id="playersTableWrap" class="tableWrap" style="margin-top:10px;">
+            <table>
+              <thead><tr><th>#</th><th>Игрок</th><th>Пришел</th><th>Re</th><th>KO</th><th>Статус</th><th>Действия</th></tr></thead>
+              <tbody id="playersTbody"></tbody>
+            </table>
+          </div>
+        </details>
 
-<details style="margin-top:12px;">
-  <summary>Импорт результатов (пост турнира)</summary>
-  <div class="sub">Вставь пост с местами. Поддерживает "1️⃣", "4.", "(14 ko)".</div>
-  <textarea id="resultsImportText" spellcheck="false" style="min-height:160px;"></textarea>
-  <div class="btnrow" style="margin-top:10px;">
-    <button id="btnResultsApply" type="button">Применить результаты</button>
-    <span class="sub mono" id="resultsImportInfo" style="margin-left:auto;"></span>
-  </div>
-</details>
+        <details style="margin-top:12px;">
+          <summary>Импорт результатов (пост турнира)</summary>
+          <div class="sub">Вставь пост с местами. Поддерживает "1️⃣", "4.", "(14 ko)".</div>
+          <textarea id="resultsImportText" spellcheck="false" style="min-height:160px;"></textarea>
+          <div class="btnrow" style="margin-top:10px;">
+            <button id="btnResultsApply" type="button">Применить результаты</button>
+            <span class="sub mono" id="resultsImportInfo" style="margin-left:auto;"></span>
+          </div>
+        </details>
 
-<details style="margin-top:12px;">
-  <summary>Пост для Telegram</summary>
-  <div class="sub">Сформируй текст поста из подтвержденных регистраций и вылетов.</div>
-  <div class="btnrow" style="margin-top:10px;">
-    <button id="btnBuildPost" type="button">Сформировать пост</button>
-    <button id="btnClearPost" type="button" class="ghost">Очистить</button>
-    <span class="sub mono" id="postInfo" style="margin-left:auto;"></span>
-  </div>
-  <textarea id="postOut" spellcheck="false" style="min-height:220px;margin-top:10px;" readonly></textarea>
-</details>
+        <details style="margin-top:12px;">
+          <summary>Пост для Telegram</summary>
+          <div class="sub">Сформируй текст поста из подтвержденных регистраций и вылетов.</div>
+          <div class="btnrow" style="margin-top:10px;">
+            <button id="btnBuildPost" type="button">Сформировать пост</button>
+            <button id="btnClearPost" type="button" class="ghost">Очистить</button>
+            <span class="sub mono" id="postInfo" style="margin-left:auto;"></span>
+          </div>
+          <textarea id="postOut" spellcheck="false" style="min-height:220px;margin-top:10px;" readonly></textarea>
+        </details>
 
-<details style="margin-top:12px;" id="paymentSection">
-  <summary>Оплата</summary>
-  <div class="sub" style="margin-bottom:12px;">Только пришедшие игроки. Нажми на игрока чтобы внести платёж.</div>
-  <div id="paymentList"></div>
-  <div class="paySummary" id="paySummary" style="display:none;">
-    <div class="paySumCard"><div class="paySumLabel">💳 Карта</div><div class="paySumValue" id="sumCard">0</div></div>
-    <div class="paySumCard"><div class="paySumLabel">💵 Наличные</div><div class="paySumValue" id="sumCash">0</div></div>
-    <div class="paySumCard"><div class="paySumLabel">📲 Перевод</div><div class="paySumValue" id="sumTransfer">0</div></div>
-    <div class="paySumCard paySumTotal"><div class="paySumLabel">Итого собрано</div><div class="paySumValue" id="sumTotal">0</div></div>
-  </div>
-</details>
+        <details style="margin-top:12px;" id="paymentSection">
+          <summary>Оплата</summary>
+          <div class="sub" style="margin-bottom:12px;">Только пришедшие игроки. Нажми на игрока чтобы внести платёж.</div>
+          <div id="paymentList"></div>
+          <div class="paySummary" id="paySummary" style="display:none;">
+            <div class="paySumCard"><div class="paySumLabel">💳 Карта</div><div class="paySumValue" id="sumCard">0</div></div>
+            <div class="paySumCard"><div class="paySumLabel">💵 Наличные</div><div class="paySumValue" id="sumCash">0</div></div>
+            <div class="paySumCard"><div class="paySumLabel">📲 Перевод</div><div class="paySumValue" id="sumTransfer">0</div></div>
+            <div class="paySumCard paySumTotal"><div class="paySumLabel">Итого собрано</div><div class="paySumValue" id="sumTotal">0</div></div>
+          </div>
+        </details>
 
         <div class="divider"></div>
 
