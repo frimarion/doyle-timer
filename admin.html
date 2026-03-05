@@ -27,7 +27,7 @@
         radial-gradient(900px 600px at 12% 20%, rgba(255,255,255,.06), transparent 55%),
         linear-gradient(180deg, var(--bg0), var(--bg1));
     }
-    .wrap{ max-width:980px; margin:16px auto 84px; padding:0 14px; box-sizing:border-box; }
+    .wrap{ max-width:980px; margin:16px auto 140px; padding:0 14px; box-sizing:border-box; }
     header.top{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin:12px 0; }
     .brand{ display:flex; align-items:center; gap:12px; min-width:220px; }
     .brand img{
@@ -153,6 +153,18 @@
     .presetName{ font-size:15px; font-weight:900; color:var(--gold2); letter-spacing:.05em; }
     .presetMeta{ font-size:12px; color:var(--muted); }
     .presetBtn{ margin-top:8px; padding:10px; border-radius:12px; font-size:13px; font-weight:900; }
+    /* confirm modal */
+    .modal-backdrop{position:fixed;inset:0;z-index:1000;background:rgba(7,7,10,.78);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:20px;}
+    .modal-box{background:linear-gradient(160deg,#13131c,#0e0e16);border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:28px 28px 22px;max-width:400px;width:100%;box-shadow:0 32px 80px rgba(0,0,0,.70);}
+    .modal-title{font-size:19px;font-weight:900;color:rgba(243,243,246,.97);margin-bottom:8px;}
+    .modal-body{font-size:14px;color:rgba(243,243,246,.65);line-height:1.55;margin-bottom:22px;}
+    .modal-btns{display:flex;gap:10px;justify-content:flex-end;}
+    /* rooms list */
+    .roomsList{display:flex;flex-direction:column;gap:8px;margin-top:14px;}
+    .roomRow{display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:14px;background:rgba(0,0,0,.22);border:1px solid rgba(255,255,255,.08);}
+    .roomRowId{font-family:var(--mono);font-size:14px;font-weight:700;color:var(--gold);flex:0 0 auto;}
+    .roomRowMeta{font-size:12px;color:var(--muted);flex:1 1 auto;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+    .roomRowBtns{display:flex;gap:6px;flex-shrink:0;}
   </style>
 </head>
 <body>
@@ -182,9 +194,10 @@
         <h2>Создать турнир</h2>
         <div class="sub">Комната будет создана в базе, после чего ты получишь ссылки для Admin и Display.</div>
         <div class="btnrow" style="margin-top:12px;">
-          <button id="btnCreate" type="button">Создать турнир</button>
+          <button id="btnCreate" type="button">+ Новый турнир</button>
+          <button id="btnRefreshRooms" type="button" class="ghost">↻ Обновить список</button>
         </div>
-        <div class="sub">Комнаты открываются по URL с параметром <span class="mono">?room=XXXXXX</span>.</div>
+        <div id="roomsList" class="roomsList"></div>
       </section>
 
       <section id="screenLinks" class="card" style="display:none;">
@@ -200,6 +213,23 @@
           </div>
         </div>
         <div class="sub">Открой Display link на ТВ/ПК. Admin link — для управления.</div>
+      </section>
+
+      <section id="screenTimer" class="card" style="display:none;">
+        <h2>Панель управления</h2>
+        <div class="btnrow">
+          <button id="start"       type="button">Start level</button>
+          <button id="pause"       type="button" class="ghost">Pause</button>
+          <button id="resume"      type="button">Resume</button>
+          <button id="prev"        type="button" class="ghost">Prev level</button>
+          <button id="next"        type="button" class="ghost">Next level</button>
+          <button id="minus60"     type="button" class="ghost">-60 sec</button>
+          <button id="plus60"      type="button" class="ghost">+60 sec</button>
+          <button id="breakBtn"    type="button" class="ghost" style="background:rgba(214,178,107,.14);border-color:rgba(214,178,107,.40);">☕ Break</button>
+          <button id="finishBreak" type="button" class="ghost" style="background:rgba(89,255,161,.08);border-color:rgba(89,255,161,.30);">▶ Finish Break</button>
+          <button id="reset"       type="button" class="danger">Reset</button>
+        </div>
+        <div class="sub mono" id="tinfo" style="margin-top:10px;"></div>
       </section>
 
       <section id="screenPreset" class="card" style="display:none;">
@@ -221,32 +251,39 @@
               </div>
             </div>
             <div class="field">
-              <label>Зарегистрировано (всего)</label>
+              <label>Поздняя регистрация до уровня <span class="muted">(0 = нет)</span></label>
               <div class="row2" style="grid-template-columns:1fr auto auto;">
-                <input id="registered" type="number" min="0" step="1" value="25" inputmode="numeric"/>
-                <button id="btnRegMinus" type="button" class="ghost" style="padding:12px 14px;">-</button>
-                <button id="btnRegPlus"  type="button" class="ghost" style="padding:12px 14px;">+</button>
+                <input id="lateReg" type="number" min="0" step="1" value="0" inputmode="numeric"/>
+                <button id="btnLateRegMinus" type="button" class="ghost" style="padding:12px 14px;">-</button>
+                <button id="btnLateRegPlus"  type="button" class="ghost" style="padding:12px 14px;">+</button>
               </div>
             </div>
           </div>
-          <div class="row2">
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">
+            <div class="field">
+              <label>Игроков</label>
+              <div style="display:grid;grid-template-columns:1fr auto auto;gap:6px;">
+                <input id="registered" type="number" min="0" step="1" value="25" inputmode="numeric"/>
+                <button id="btnRegMinus" type="button" class="ghost" style="padding:10px 12px;">-</button>
+                <button id="btnRegPlus"  type="button" class="ghost" style="padding:10px 12px;">+</button>
+              </div>
+            </div>
             <div class="field">
               <label>Ре-энтри</label>
-              <div class="row2" style="grid-template-columns:1fr auto auto;">
+              <div style="display:grid;grid-template-columns:1fr auto auto;gap:6px;">
                 <input id="reentries" type="number" min="0" step="1" value="0" inputmode="numeric"/>
-                <button id="btnReMinus" type="button" class="ghost" style="padding:12px 14px;">-</button>
-                <button id="btnRePlus"  type="button" class="ghost" style="padding:12px 14px;">+</button>
+                <button id="btnReMinus" type="button" class="ghost" style="padding:10px 12px;">-</button>
+                <button id="btnRePlus"  type="button" class="ghost" style="padding:10px 12px;">+</button>
               </div>
-              <div class="sub">Ре-энтри не меняют «в игре», но увеличивают «всего входов» и средний стек.</div>
             </div>
             <div class="field">
               <label>Busted</label>
-              <div class="row2" style="grid-template-columns:1fr auto auto;">
+              <div style="display:grid;grid-template-columns:1fr auto auto;gap:6px;">
                 <input id="busted" type="number" min="0" step="1" value="0" inputmode="numeric"/>
-                <button id="btnBustMinus" type="button" class="ghost" style="padding:12px 14px;">-</button>
-                <button id="btnBustPlus"  type="button" class="ghost" style="padding:12px 14px;">+</button>
+                <button id="btnBustMinus" type="button" class="ghost" style="padding:10px 12px;">-</button>
+                <button id="btnBustPlus"  type="button" class="ghost" style="padding:10px 12px;">+</button>
               </div>
-              <div class="sub">В игре = зарегистрировано − busted.</div>
+
             </div>
           </div>
           <div class="btnrow"><button id="btnSaveQuick" type="button">Сохранить</button></div>
@@ -257,7 +294,67 @@
           </div>
         </div>
 
-        <div class="divider"></div>
+
+
+<details style="margin-top:12px;">
+  <summary>Импорт списка игроков (из Telegram)</summary>
+  <div class="sub">Вставь нумерованный список (по 1 игроку в строке). Поддерживает "1.", "1)", "1️⃣".</div>
+  <textarea id="playersImportText" spellcheck="false" style="min-height:140px;"></textarea>
+  <div class="btnrow" style="margin-top:10px;">
+    <button id="btnPlayersReplace" type="button">Заменить список</button>
+    <button id="btnPlayersAdd" type="button" class="ghost">Добавить новых</button>
+    <span class="sub mono" id="playersImportInfo" style="margin-left:auto;"></span>
+  </div>
+</details>
+
+<details style="margin-top:12px;">
+  <summary>Игроки (быстрое управление)</summary>
+  <div class="sub">Отметь «Пришел», затем кнопка BUSTED спросит KO, отметит вылет и обновит «В игре» на дисплее.</div>
+    <div class="btnrow" style="margin-top:10px;">
+    <button id="btnPlayerPlus" type="button">+ Добавить игрока</button>
+    <span class="sub mono" id="playersQuickInfo" style="margin-left:auto;"></span>
+  </div>
+<div id="playersTableWrap" class="tableWrap" style="margin-top:10px;">
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Игрок</th>
+          <th>Пришел</th>
+          <th>KO</th>
+          <th>Статус</th>
+          <th>Действия</th>
+        </tr>
+      </thead>
+      <tbody id="playersTbody"></tbody>
+    </table>
+  </div>
+</details>
+
+<details style="margin-top:12px;">
+  <summary>Импорт результатов (пост турнира)</summary>
+  <div class="sub">Вставь пост с местами. Поддерживает "1️⃣", "4.", "(14 ko)".</div>
+  <textarea id="resultsImportText" spellcheck="false" style="min-height:160px;"></textarea>
+  <div class="btnrow" style="margin-top:10px;">
+    <button id="btnResultsApply" type="button">Применить результаты</button>
+    <span class="sub mono" id="resultsImportInfo" style="margin-left:auto;"></span>
+  </div>
+</details>
+
+
+<details style="margin-top:12px;">
+  <summary>Пост для Telegram</summary>
+  <div class="sub">Сформируй текст поста из подтвержденных регистраций и вылетов. Нажми кнопку — текст появится ниже для копирования.</div>
+  <div class="btnrow" style="margin-top:10px;">
+    <button id="btnBuildPost" type="button">Сформировать пост</button>
+    <button id="btnClearPost" type="button" class="ghost">Очистить</button>
+    <span class="sub mono" id="postInfo" style="margin-left:auto;"></span>
+  </div>
+  <textarea id="postOut" spellcheck="false" style="min-height:220px;margin-top:10px;" readonly></textarea>
+</details>
+
+
+<div class="divider"></div>
 
         <div class="ratingBox">
           <div class="ratingHead">
@@ -281,20 +378,6 @@
         </div>
       </section>
 
-      <section id="screenTimer" class="card" style="display:none;">
-        <h2>Таймер</h2>
-        <div class="btnrow">
-          <button id="start"   type="button">Start level</button>
-          <button id="pause"   type="button" class="ghost">Pause</button>
-          <button id="resume"  type="button">Resume</button>
-          <button id="next"    type="button" class="ghost">Next level</button>
-          <button id="prev"    type="button" class="ghost">Prev level</button>
-          <button id="minus60" type="button" class="ghost">-60 sec</button>
-          <button id="reset"   type="button" class="danger">Reset</button>
-        </div>
-        <div class="sub mono" id="tinfo" style="margin-top:10px;"></div>
-      </section>
-
       <section id="screenStructure" class="card" style="display:none;">
         <div class="accordion" id="structureAccordion">
           <button class="accordion-header" id="structureToggle" type="button" aria-expanded="false">
@@ -309,14 +392,8 @@
                 <button id="btnStructureSave"  type="button">Сохранить структуру</button>
                 <button id="btnStructureReset" type="button" class="ghost">Дефолт</button>
               </div>
-              <div class="tableWrap">
-                <table id="levelsTable">
-                  <thead>
-                    <tr><th>#</th><th>Type</th><th>Min</th><th>SB</th><th>BB</th><th>Ante</th><th>Move</th><th>Del</th></tr>
-                  </thead>
-                  <tbody></tbody>
-                </table>
-              </div>
+              <div id="levelsCards" style="display:flex;flex-direction:column;gap:6px;"></div>
+              <table id="levelsTable" style="display:none;"><tbody></tbody></table>
               <details style="margin-top:12px;">
                 <summary>Advanced: JSON editor</summary>
                 <div class="sub">Если хочешь — можно править структуру в JSON и сохранить.</div>
@@ -345,6 +422,35 @@
       </div>
     </div>
   </div>
+
+  <!-- confirm modal -->
+  <div id="confirmModal" class="modal-backdrop" style="display:none;" role="dialog" aria-modal="true">
+    <div class="modal-box">
+      <div class="modal-title" id="confirmTitle">Подтвердить</div>
+      <div class="modal-body" id="confirmBody"></div>
+      <div class="modal-btns">
+        <button type="button" class="ghost" id="confirmCancel">Отмена</button>
+        <button type="button" id="confirmOk">Подтвердить</button>
+      </div>
+    </div>
+  </div>
+
+
+<!-- KO input modal -->
+<div id="koModal" class="modal-backdrop" style="display:none;" role="dialog" aria-modal="true">
+  <div class="modal-box">
+    <div class="modal-title" id="koTitle">KO</div>
+    <div class="modal-body" id="koBody">Укажи количество KO для игрока</div>
+    <div class="field" style="margin-bottom:14px;">
+      <label>KO</label>
+      <input id="koInput" type="number" min="0" step="1" inputmode="numeric" class="mono"/>
+    </div>
+    <div class="modal-btns">
+      <button type="button" class="ghost" id="koCancel">Отмена</button>
+      <button type="button" id="koOk">Сохранить</button>
+    </div>
+  </div>
+</div>
 
   <script src="config.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -404,6 +510,7 @@
       "DAILY": {
         name: "Daily Tournament",
         startStack: 30000,
+        lateRegUntilLevel: 9,
         levels: [
           {"min":16,"sb":100,"bb":100,"anteMode":"BB"},{"min":16,"sb":100,"bb":200,"anteMode":"BB"},
           {"min":16,"sb":100,"bb":300,"anteMode":"BB"},{"min":16,"sb":200,"bb":400,"anteMode":"BB"},
@@ -426,22 +533,30 @@
           {"min":10,"sb":500000,"bb":1000000,"anteMode":"BB"}
         ]
       },
-      "CORPORATE": {
-        name: "Corporate Tournament",
-        startStack: 10000,
+      "DEEPSTACK": {
+        name: "Deep Stack Tournament",
+        startStack: 40000,
+        lateRegUntilLevel: 10,
         levels: [
-          {"min":8,"sb":100,"bb":200,"anteMode":"NONE"},
-          {"min":8,"sb":200,"bb":300,"anteMode":"NONE"},
-          {"min":8,"sb":300,"bb":600,"anteMode":"NONE"},
-          {"min":8,"sb":500,"bb":1000,"anteMode":"NONE"},
-          {"min":8,"sb":800,"bb":1600,"anteMode":"NONE"},
-          {"min":8,"sb":1200,"bb":2400,"anteMode":"NONE"},
-          {"min":8,"sb":2000,"bb":4000,"anteMode":"NONE"},
+          {"min":16,"sb":100,"bb":100,"anteMode":"BB"},{"min":16,"sb":100,"bb":200,"anteMode":"BB"},
+          {"min":16,"sb":100,"bb":300,"anteMode":"BB"},{"min":16,"sb":200,"bb":400,"anteMode":"BB"},
+          {"min":16,"sb":300,"bb":600,"anteMode":"BB"},{"min":16,"sb":400,"bb":800,"anteMode":"BB"},
           {"isBreak":true,"min":10},
-          {"min":8,"sb":3000,"bb":6000,"anteMode":"NONE"},
-          {"min":8,"sb":5000,"bb":10000,"anteMode":"NONE"},
-          {"min":8,"sb":8000,"bb":16000,"anteMode":"NONE"},
-          {"min":8,"sb":12000,"bb":24000,"anteMode":"NONE"}
+          {"min":16,"sb":500,"bb":1000,"anteMode":"BB"},{"min":16,"sb":600,"bb":1200,"anteMode":"BB"},
+          {"min":16,"sb":800,"bb":1600,"anteMode":"BB"},{"min":12,"sb":1000,"bb":2000,"anteMode":"BB"},
+          {"min":12,"sb":1000,"bb":3000,"anteMode":"BB"},{"min":12,"sb":2000,"bb":4000,"anteMode":"BB"},
+          {"min":12,"sb":2000,"bb":5000,"anteMode":"BB"},{"min":12,"sb":3000,"bb":6000,"anteMode":"BB"},
+          {"min":12,"sb":4000,"bb":8000,"anteMode":"BB"},{"min":12,"sb":5000,"bb":10000,"anteMode":"BB"},
+          {"min":12,"sb":6000,"bb":12000,"anteMode":"BB"},{"min":12,"sb":8000,"bb":16000,"anteMode":"BB"},
+          {"min":12,"sb":10000,"bb":20000,"anteMode":"BB"},{"min":10,"sb":15000,"bb":30000,"anteMode":"BB"},
+          {"min":10,"sb":20000,"bb":40000,"anteMode":"BB"},{"min":10,"sb":25000,"bb":50000,"anteMode":"BB"},
+          {"min":10,"sb":30000,"bb":60000,"anteMode":"BB"},{"min":10,"sb":40000,"bb":80000,"anteMode":"BB"},
+          {"min":10,"sb":50000,"bb":100000,"anteMode":"BB"},{"min":10,"sb":60000,"bb":120000,"anteMode":"BB"},
+          {"min":10,"sb":80000,"bb":160000,"anteMode":"BB"},{"min":10,"sb":100000,"bb":200000,"anteMode":"BB"},
+          {"min":10,"sb":125000,"bb":250000,"anteMode":"BB"},{"min":10,"sb":150000,"bb":300000,"anteMode":"BB"},
+          {"min":10,"sb":200000,"bb":400000,"anteMode":"BB"},{"min":10,"sb":250000,"bb":500000,"anteMode":"BB"},
+          {"min":10,"sb":300000,"bb":600000,"anteMode":"BB"},{"min":10,"sb":400000,"bb":800000,"anteMode":"BB"},
+          {"min":10,"sb":500000,"bb":1000000,"anteMode":"BB"}
         ]
       }
     };
@@ -472,6 +587,12 @@
       st.rating=st.rating||{isActive:false,entries:null,r:0.8,P:0,TOTAL:0,KO_POOL:0,ITM_POOL:0,payouts:[],calculatedAt:null};
 
       st.tournament.startStack=clampInt(st.tournament.startStack,0);
+      st.tournament.lateRegUntilLevel=clampInt(st.tournament.lateRegUntilLevel??0,0);
+      // breakUntil: timestamp when break ends; savedRemainingSec: level time to restore after break
+      if (st.timer.breakUntil!=null){
+        const ts=Number(st.timer.breakUntil);
+        if (!Number.isFinite(ts)||ts<1000000000000||ts>nowMs()+7200000) st.timer.breakUntil=null;
+      }
       st.stats.registered=clampInt(st.stats.registered,0);
       st.stats.reentries=clampInt(st.stats.reentries,0);
 
@@ -524,6 +645,7 @@
       $("screenCreate").style.display=""; $("screenLinks").style.display="none";
       $("screenQuick").style.display="none"; $("screenTimer").style.display="none";
       $("screenStructure").style.display="none"; $("stickyBar").style.display="none";
+      loadRooms();
     }
     function showForRoom(){
       $("screenCreate").style.display="none"; $("screenLinks").style.display="";
@@ -551,6 +673,7 @@
             await saveWithReload(st=>{
               st.structure.levels=preset.levels.map(l=>({...l}));
               st.tournament.startStack=preset.startStack;
+              st.tournament.lateRegUntilLevel=preset.lateRegUntilLevel??0;
               st.timer.levelIndex=0;
               st.timer.isRunning=false; st.timer.isPaused=false;
               st.timer.levelEndAt=null; st.timer.pauseRemainingSec=null;
@@ -599,6 +722,435 @@
 
     function setSync(x){ $("syncText").textContent=`sync: ${x}`; }
 
+    // ===== confirm modal ─────────────────────────────────────────────────────
+    function confirm2(title, body){
+      return new Promise(resolve=>{
+        $("confirmTitle").textContent=title;
+        $("confirmBody").textContent=body;
+        $("confirmModal").style.display="flex";
+        const cleanup=(result)=>{
+          $("confirmModal").style.display="none";
+          $("confirmOk").onclick=null; $("confirmCancel").onclick=null;
+          resolve(result);
+        };
+        $("confirmOk").onclick=()=>cleanup(true);
+        $("confirmCancel").onclick=()=>cleanup(false);
+        $("confirmModal").onclick=(e)=>{ if(e.target===$("confirmModal"))cleanup(false); };
+      });
+    }
+
+// ===== Players import helpers (temporary, no bot) =====
+function normName(s){
+  return (s||"").replace(/\u00A0/g," ").replace(/\s+/g," ").trim();
+}
+function keyName(s){ return normName(s).toLowerCase(); }
+
+function ensurePlayers(st){
+  if (!Array.isArray(st.players)) st.players = [];
+  st.players = st.players.map(p=>({
+    name: normName(p?.name||""),
+    present: !!p?.present,
+    reentries: clampInt(p?.reentries ?? 0, 0),
+    payment: (p?.payment||""),
+    paid: clampInt(p?.paid ?? 0, 0),
+    status: (p?.status||"registered"), // registered | playing | busted
+    bustOrder: (p?.bustOrder ?? null),
+    place: (p?.place ?? null),
+    ko: clampInt(p?.ko ?? 0, 0)
+  })).filter(p=>p.name);
+  return st;
+}
+
+function computeStatsFromPlayers(st){
+  ensurePlayers(st);
+  const present = st.players.filter(p=>p.present).length;
+  const busted  = st.players.filter(p=>p.present && p.status==="busted").length;
+  const alive   = Math.max(0, present - busted);
+  const reentries = st.players.reduce((a,p)=>a+clampInt(p.reentries??0,0),0);
+  st.stats.registered = present;
+  st.stats.busted = busted;
+  st.stats.alive = alive;
+  st.stats.reentries = reentries;
+  return st;
+}
+
+// Parse numbered registration list (Telegram)
+function parseRegList(text){
+  const lines=(text||"").split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
+  const out=[];
+  for (const line of lines){
+    let s=line
+      .replace(/^\s*(?:\d{1,3}\s*[\.\)\-]|[\d0-9]️⃣)\s*/u,"")
+      .trim();
+    if (!s) continue;
+    if (/^результаты|^формат:|^разыграно|^в\s+«?приз/i.test(s)) continue;
+    out.push({name:normName(s),present:false,reentries:0,payment:"",paid:0,status:"registered",bustOrder:null,place:null,ko:0});
+  }
+  const seen=new Set();
+  return out.filter(p=>{
+    const k=keyName(p.name);
+    if (!k||seen.has(k)) return false;
+    seen.add(k); return true;
+  });
+}
+
+// Parse results post (place + optional "(N ko)")
+function parseResultsPost(text){
+  const lines=(text||"").split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
+  const rows=[];
+  for (const line of lines){
+    const m=line.match(/^\s*(\d{1,3})\s*(?:[️⃣⃣]|[\.\)])\s*(.+)$/u);
+    if (!m) continue;
+    const place=parseInt(m[1],10);
+    if (!Number.isFinite(place)||place<=0) continue;
+    let rest=m[2].trim();
+    let ko=0;
+    const km=rest.match(/\(\s*(\d{1,3})\s*ko\s*\)/i);
+    if (km){
+      ko=parseInt(km[1],10)||0;
+      rest=rest.replace(km[0],"").trim();
+    }
+    rest = rest.replace(/[–—-]\s*@\S+$/,"").trim();
+    if (!rest) continue;
+    rows.push({place,name:normName(rest),ko});
+  }
+  return rows;
+}
+
+function mergePlayers(st, list, mode){
+  ensurePlayers(st);
+  const incoming=Array.isArray(list)?list:[];
+  if (mode==="replace"){
+    st.players=incoming;
+  } else {
+    const map=new Map(st.players.map(p=>[keyName(p.name),p]));
+    for (const p of incoming){
+      const k=keyName(p.name);
+      if (!k) continue;
+      if (!map.has(k)){
+        st.players.push(p);
+        map.set(k,p);
+      }
+    }
+  }
+  return st;
+}
+
+function applyResults(st, results){
+  ensurePlayers(st);
+  const map=new Map(st.players.map(p=>[keyName(p.name),p]));
+  const notFound=[];
+  for (const r of (results||[])){
+    const k=keyName(r.name);
+    const p=map.get(k);
+    if (!p){ notFound.push(r); continue; }
+    p.place=r.place;
+    p.ko=clampInt(r.ko??0,0);
+    p.status="busted";
+  }
+  return {notFound};
+}
+
+
+
+// ===== Telegram post builder =====
+function placeEmoji(n){
+  if (n===1) return "1️⃣";
+  if (n===2) return "2️⃣";
+  if (n===3) return "3️⃣";
+  return String(n)+".";
+}
+function formatRuDateFromState(st){
+  const iso = st?.tournament?.createdAt;
+  const d = iso ? new Date(iso) : new Date();
+  if (Number.isNaN(d.getTime())) return new Date().toLocaleDateString("ru-RU");
+  return d.toLocaleDateString("ru-RU");
+}
+function buildTelegramPostFromState(st){
+  ensurePlayers(st);
+  computeStatsFromPlayers(st);
+
+  const dateStr = formatRuDateFromState(st);
+  const reg = clampInt(st?.stats?.registered ?? 0, 0);
+  const busted = clampInt(st?.stats?.busted ?? 0, 0);
+  const alive = clampInt(st?.stats?.alive ?? 0, 0);
+
+  // derive places: use explicit place if present.
+  // If tournament effectively finished (alive===1), assign place=1 to the remaining alive player if not assigned.
+  const players = st.players.map(p=>({...p}));
+  if (alive===1){
+    const last = players.find(p=>p.present && p.status!=="busted");
+    if (last && (last.place==null)){
+      last.place = 1;
+    }
+  }
+
+  const finishedList = players
+    .filter(p=>p.present && p.place!=null)
+    .sort((a,b)=> (a.place??999) - (b.place??999));
+
+  const lines = finishedList.map(p=>{
+    const place = placeEmoji(clampInt(p.place, 0));
+    const ko = clampInt(p.ko ?? 0, 0);
+    return ko>0 ? `${place} ${p.name} (${ko} ko)` : `${place} ${p.name}`;
+  }).join("\n");
+
+  const itm = Array.isArray(st?.rating?.payouts) ? st.rating.payouts.length : 0;
+
+  const header = [
+    `РЕЗУЛЬТАТЫ ТУРНИРА ${dateStr}`,
+    ``,
+    `Подтверждено: ${reg}`,
+    `Вылетело: ${busted}`,
+    `В игре: ${alive}`,
+    ...(itm>0 ? [`В «призах»: ${itm} участников`] : []),
+    ``,
+    `Всем спасибо за участие!`,
+    ``
+  ].join("\n");
+
+  const footer = [
+    ``,
+    `По всем вопросам: @doylemsk`
+  ].join("\n");
+
+  // If no places yet, still return header + a short note
+  if (!lines){
+    return header + `\n(Пока нет заполненных мест — нужны вылеты/результаты.)\n` + footer;
+  }
+  return header + lines + footer;
+}
+
+
+// KO input modal (instead of prompt)
+function askKo2(playerName, presetValue=0){
+  return new Promise(resolve=>{
+    const m=$("koModal");
+    if (!m){ resolve(null); return; }
+    $("koTitle").textContent = `KO — ${playerName}`;
+    $("koInput").value = String(clampInt(presetValue,0));
+    m.style.display="flex";
+    $("koInput").focus(); $("koInput").select();
+
+    const cleanup=(val)=>{
+      m.style.display="none";
+      $("koOk").onclick=null; $("koCancel").onclick=null;
+      m.onclick=null;
+      resolve(val);
+    };
+
+    $("koOk").onclick=()=>cleanup(clampInt($("koInput").value,0));
+    $("koCancel").onclick=()=>cleanup(null);
+    m.onclick=(e)=>{ if (e.target===m) cleanup(null); };
+
+    $("koInput").onkeydown=(e)=>{
+      if (e.key==="Enter") $("koOk").click();
+      if (e.key==="Escape") $("koCancel").click();
+    };
+  });
+}
+
+function renderPlayersTable(){
+  const tb=$("playersTbody");
+  if (!tb) return;
+  const players=(state?.players||[]).slice();
+  tb.innerHTML="";
+  players.forEach((p,idx)=>{
+    const tr=document.createElement("tr");
+    const status = p.present ? (p.status||"registered") : "—";
+    tr.innerHTML=`
+      <td class="mono">${idx+1}</td>
+      <td>${p.name}</td>
+      <td><input type="checkbox" data-act="present" ${p.present?"checked":""}/></td>
+      <td class="mono">${clampInt(p.ko??0,0)}</td>
+      <td class="mono">${status}</td>
+      <td><button type="button" class="miniBtn danger" data-act="bust" ${(!p.present||p.status==="busted")?"disabled":""}>BUSTED</button></td>
+    `;
+    tr.querySelector("[data-act='present']").addEventListener("change", async(e)=>{
+      const checked=!!e.target.checked;
+      await saveWithReload(st=>{
+        ensurePlayers(st);
+        const t=st.players.find(x=>keyName(x.name)===keyName(p.name));
+        if (t){
+          t.present=checked;
+          if (!checked){
+            t.status="registered";
+            t.place=null;
+            t.bustOrder=null;
+            t.ko=clampInt(t.ko??0,0);
+          } else {
+            if (!t.status || t.status==="registered") t.status="playing";
+          }
+        }
+        return computeStatsFromPlayers(st);
+      });
+    });
+
+    tr.querySelector("[data-act='bust']").addEventListener("click", async()=>{
+      const ko=await askKo2(p.name, p.ko??0);
+      if (ko===null) return;
+      await saveWithReload(st=>{
+        ensurePlayers(st);
+        computeStatsFromPlayers(st);
+        const aliveBefore=clampInt(st.stats.alive,0);
+        const t=st.players.find(x=>keyName(x.name)===keyName(p.name));
+        if (t){
+          t.ko=clampInt(ko,0);
+          t.status="busted";
+          t.bustOrder = st.players.filter(x=>x.present && x.status==="busted").length + 1;
+          t.place = aliveBefore;
+        }
+        return computeStatsFromPlayers(st);
+      });
+    });
+
+    tb.appendChild(tr);
+  });
+}
+
+let playersUiBound=false;
+function bindPlayersUi(){
+  if (playersUiBound) return;
+  playersUiBound=true;
+
+  $("btnPlayersReplace")?.addEventListener("click", async()=>{
+    try{
+      $("err").textContent="";
+      const list=parseRegList($("playersImportText").value);
+      await saveWithReload(st=>{
+        ensurePlayers(st);
+        mergePlayers(st,list,"replace");
+        return computeStatsFromPlayers(st);
+      });
+      $("playersImportInfo").textContent=`ok: ${list.length}`;
+    }catch(e){ $("err").textContent=e.message||String(e); }
+  });
+
+  $("btnPlayersAdd")?.addEventListener("click", async()=>{
+    try{
+      $("err").textContent="";
+      const list=parseRegList($("playersImportText").value);
+      await saveWithReload(st=>{
+        ensurePlayers(st);
+        mergePlayers(st,list,"add");
+        return computeStatsFromPlayers(st);
+      });
+      $("playersImportInfo").textContent=`added: ${list.length}`;
+    }catch(e){ $("err").textContent=e.message||String(e); }
+  });
+
+  $("btnResultsApply")?.addEventListener("click", async()=>{
+    try{
+      $("err").textContent="";
+      const results=parseResultsPost($("resultsImportText").value);
+      let notFound=[];
+      await saveWithReload(st=>{
+        ensurePlayers(st);
+        const res=applyResults(st,results);
+        notFound=res.notFound;
+        return computeStatsFromPlayers(st);
+      });
+      $("resultsImportInfo").textContent = notFound.length ? `not found: ${notFound.length} (см. console)` : `ok: ${results.length}`;
+      if (notFound.length) console.warn("[results] not found:", notFound);
+    }catch(e){ $("err").textContent=e.message||String(e); }
+  });
+
+
+  $("btnPlayerPlus")?.addEventListener("click", async()=>{
+    try{
+      $("err").textContent="";
+      const nameRaw = prompt("Имя игрока (как в Telegram):","");
+      if (nameRaw==null) return;
+      const name = normName(nameRaw);
+      if (!name) return;
+
+      await saveWithReload(st=>{
+        ensurePlayers(st);
+        const k = keyName(name);
+        if (!st.players.some(p=>keyName(p.name)===k)){
+          st.players.push({
+            name,
+            present: true,
+            reentries: 0,
+            payment: "",
+            paid: 0,
+            status: "playing",
+            bustOrder: null,
+            place: null,
+            ko: 0
+          });
+        }
+        return computeStatsFromPlayers(st);
+      });
+      $("playersQuickInfo").textContent = `+ ${name}`;
+    }catch(e){ $("err").textContent=e.message||String(e); }
+  });
+
+  $("btnBuildPost")?.addEventListener("click", ()=>{
+    try{
+      $("err").textContent="";
+      const text = buildTelegramPostFromState(state||{});
+      $("postOut").value = text;
+      $("postInfo").textContent = `ready`;
+    }catch(e){ $("err").textContent=e.message||String(e); }
+  });
+
+  $("btnClearPost")?.addEventListener("click", ()=>{
+    $("postOut").value = "";
+    $("postInfo").textContent = "";
+  });
+
+
+}
+
+    // ===== rooms list ─────────────────────────────────────────────────────────
+    async function loadRooms(){
+      const list=$("roomsList"); if(!list)return;
+      list.innerHTML=`<div class="sub">Загрузка...</div>`;
+      try{
+        const{data,error}=await sb.from("rooms").select("room_id,state");
+        if(error)throw error;
+        if(!data||!data.length){ list.innerHTML=`<div class="sub">Нет турниров</div>`; return; }
+        list.innerHTML="";
+        const base=location.origin+location.pathname.replace(/\/[^\/]*$/,"/");
+        data.forEach(row=>{
+          const st=row.state||{};
+          const lvIdx=st.timer?.levelIndex??0;
+          const lvCount=st.structure?.levels?.length??0;
+          const reg=st.stats?.registered??0;
+          const created=st.tournament?.createdAt?new Date(st.tournament.createdAt).toLocaleDateString("ru-RU",{day:"2-digit",month:"2-digit",year:"numeric"}):"—";
+          const isCurrentRoom=row.room_id===roomId;
+          const div=document.createElement("div");
+          div.className="roomRow"+(isCurrentRoom?" ":'');
+          div.style.borderColor=isCurrentRoom?"rgba(214,178,107,.35)":"";
+          div.innerHTML=`
+            <div class="roomRowId">${row.room_id}</div>
+            <div class="roomRowMeta">создан ${created} · ${reg} игроков · уровень ${lvIdx+1}/${lvCount}</div>
+            <div class="roomRowBtns">
+              <button type="button" class="miniBtn ghost" data-open="${row.room_id}" title="Открыть">→</button>
+              <button type="button" class="miniBtn danger" data-del="${row.room_id}" title="Удалить">✕</button>
+            </div>`;
+          div.querySelector("[data-open]").addEventListener("click",()=>{
+            location.href=`admin.html?room=${row.room_id}`;
+          });
+          div.querySelector("[data-del]").addEventListener("click",async()=>{
+            const ok=await confirm2(
+              `Удалить турнир ${row.room_id}?`,
+              "Это действие необратимо — все данные комнаты будут удалены из базы."
+            );
+            if(!ok)return;
+            try{
+              const{error}=await sb.from("rooms").delete().eq("room_id",row.room_id);
+              if(error)throw error;
+              if(row.room_id===roomId){ location.href="admin.html"; return; }
+              await loadRooms();
+            }catch(e){ $("err").textContent=e.message; }
+          });
+          list.appendChild(div);
+        });
+      }catch(e){ list.innerHTML=`<div class="sub" style="color:var(--danger)">${e.message}</div>`; }
+    }
+
     // ===== create room
     async function createRoomInDb(newId){
       const {error}=await sb.from("rooms").insert({room_id:newId,state:initialState()});
@@ -615,6 +1167,7 @@
       }catch(e){ $("err").textContent=e.message; }
     };
     $("copyAdmin").onclick=async()=>{ try{ await navigator.clipboard.writeText($("adminLink").value); }catch(e){} };
+    $("btnRefreshRooms")?.addEventListener("click",loadRooms);
     $("copyDisplay").onclick=async()=>{ try{ await navigator.clipboard.writeText($("displayLink").value); }catch(e){} };
 
     // ===== quick fields
@@ -631,6 +1184,7 @@
 
     function fillQuickFromState(){
       setIfNotFocused("startStack",state?.tournament?.startStack??30000);
+      setIfNotFocused("lateReg",state?.tournament?.lateRegUntilLevel??0);
       setIfNotFocused("registered",state?.stats?.registered??0);
       setIfNotFocused("reentries",state?.stats?.reentries??0);
       setIfNotFocused("busted",state?.stats?.busted??Math.max(0,(state?.stats?.registered??0)-(state?.stats?.alive??0)));
@@ -646,14 +1200,17 @@
       if (!roomId) return;
       try{
         const startStack=clampInt($("startStack").value,0);
+        const lateRegUntilLevel=clampInt($("lateReg").value,0);
         const registered=clampInt($("registered").value,0);
         const reentries=clampInt($("reentries").value,0);
         let busted=Math.min(clampInt($("busted").value,0),registered);
         const alive=Math.max(0,registered-busted);
         await saveWithReload(st=>{
-          st.tournament.startStack=startStack; st.stats.registered=registered;
+          st.tournament.startStack=startStack;
+          st.tournament.lateRegUntilLevel=lateRegUntilLevel;
+          st.stats.registered=registered;
           st.stats.reentries=reentries; st.stats.busted=busted; st.stats.alive=alive;
-          if (st.rating){ st.rating.isActive=false; st.rating.calculatedAt=null; }
+          // busted change does not invalidate rating
         });
         clearDirty("startStack"); clearDirty("registered"); clearDirty("reentries"); clearDirty("busted");
         fillQuickFromState(); renderKpis();
@@ -682,14 +1239,17 @@
       try{
         $("err").textContent="";
         const startStack=clampInt($("startStack").value,0);
+        const lateRegUntilLevel=clampInt($("lateReg").value,0);
         const registered=clampInt($("registered").value,0);
         const reentries=clampInt($("reentries").value,0);
         let busted=Math.min(clampInt($("busted").value,0),registered);
         await saveWithReload(st=>{
-          st.tournament.startStack=startStack; st.stats.registered=registered;
+          st.tournament.startStack=startStack;
+          st.tournament.lateRegUntilLevel=lateRegUntilLevel;
+          st.stats.registered=registered;
           st.stats.reentries=reentries; st.stats.busted=busted;
           st.stats.alive=Math.max(0,registered-busted);
-          if (st.rating){ st.rating.isActive=false; st.rating.calculatedAt=null; }
+          // busted does not affect rating — keep it active
           st.timer.levelIndex=Math.min(st.timer.levelIndex,Math.max(0,st.structure.levels.length-1));
           return st;
         });
@@ -697,27 +1257,35 @@
     };
 
     // ===== steppers
-    async function bump(mut){
+    async function bump(mut,keepRating=false){
       try{
         $("err").textContent="";
         await saveWithReload(st=>{
           mut(st);
-          if (st.rating){ st.rating.isActive=false; st.rating.calculatedAt=null; }
+          if (!keepRating&&st.rating){ st.rating.isActive=false; st.rating.calculatedAt=null; }
           st.stats.registered=clampInt(st.stats.registered,0);
           st.stats.reentries=clampInt(st.stats.reentries,0);
           st.stats.busted=Math.min(clampInt(st.stats.busted,0),st.stats.registered);
           st.stats.alive=Math.max(0,st.stats.registered-st.stats.busted);
           st.tournament.startStack=clampInt(st.tournament.startStack,0);
+      st.tournament.lateRegUntilLevel=clampInt(st.tournament.lateRegUntilLevel??0,0);
+      // breakUntil: timestamp when break ends; savedRemainingSec: level time to restore after break
+      if (st.timer.breakUntil!=null){
+        const ts=Number(st.timer.breakUntil);
+        if (!Number.isFinite(ts)||ts<1000000000000||ts>nowMs()+7200000) st.timer.breakUntil=null;
+      }
           return st;
         });
       }catch(e){ $("err").textContent=e.message; }
     }
+    $("btnLateRegPlus")?.addEventListener("click",()=>bump(st=>{ st.tournament.lateRegUntilLevel=clampInt(st.tournament.lateRegUntilLevel??0,0)+1; }));
+    $("btnLateRegMinus")?.addEventListener("click",()=>bump(st=>{ st.tournament.lateRegUntilLevel=Math.max(0,clampInt(st.tournament.lateRegUntilLevel??0,0)-1); }));
     $("btnRegPlus")?.addEventListener("click",()=>bump(st=>{ st.stats.registered=clampInt(st.stats.registered,0)+1; }));
     $("btnRegMinus")?.addEventListener("click",()=>bump(st=>{ st.stats.registered=Math.max(0,clampInt(st.stats.registered,0)-1); }));
     $("btnRePlus")?.addEventListener("click",()=>bump(st=>{ st.stats.reentries=clampInt(st.stats.reentries,0)+1; }));
     $("btnReMinus")?.addEventListener("click",()=>bump(st=>{ st.stats.reentries=Math.max(0,clampInt(st.stats.reentries,0)-1); }));
-    $("btnBustPlus")?.addEventListener("click",()=>bump(st=>{ st.stats.busted=clampInt(st.stats.busted,0)+1; }));
-    $("btnBustMinus")?.addEventListener("click",()=>bump(st=>{ st.stats.busted=Math.max(0,clampInt(st.stats.busted,0)-1); }));
+    $("btnBustPlus")?.addEventListener("click",()=>bump(st=>{ st.stats.busted=clampInt(st.stats.busted,0)+1; },true));
+    $("btnBustMinus")?.addEventListener("click",()=>bump(st=>{ st.stats.busted=Math.max(0,clampInt(st.stats.busted,0)-1); },true));
     $("btnStartPlus")?.addEventListener("click",()=>bump(st=>{ st.tournament.startStack=clampInt(st.tournament.startStack,0)+1000; }));
     $("btnStartMinus")?.addEventListener("click",()=>bump(st=>{ st.tournament.startStack=Math.max(0,clampInt(st.tournament.startStack,0)-1000); }));
 
@@ -755,53 +1323,87 @@
     }
 
     function renderLevelsTable(levels){
+      // Also keep hidden legacy tbody in sync for readLevelsFromTable
       const tbody=$("levelsTable").querySelector("tbody");
-      tbody.innerHTML="";
+      const container=$("levelsCards");
+      tbody.innerHTML=""; container.innerHTML="";
+      let _playNo=0;
       levels.forEach((lv,idx)=>{
-        const tr=document.createElement("tr");
         const type=lv.isBreak?"break":"level";
         const min=lv.min??0, sb=lv.sb??0, bb=lv.bb??0;
         const ante=(lv.anteMode==="BB")?"BB":"NONE";
-        tr.innerHTML=`
-          <td class="mono">${idx+1}</td>
-          <td><select data-k="type">
+        // ── hidden row for readLevelsFromTable ──
+        const tr=document.createElement("tr");
+        tr.innerHTML=`<td></td>
+          <td><select data-k="type"><option value="level"${type==="level"?" selected":""}>Level</option><option value="break"${type==="break"?" selected":""}>Break</option></select></td>
+          <td><input data-k="min" type="number" value="${min}"></td>
+          <td><input data-k="sb"  type="number" value="${sb}"></td>
+          <td><input data-k="bb"  type="number" value="${bb}"></td>
+          <td><select data-k="ante"><option value="NONE"${ante==="NONE"?" selected":""}>—</option><option value="BB"${ante==="BB"?" selected":""}>BB</option></select></td>`;
+        tbody.appendChild(tr);
+        // ── visible card ──
+        const card=document.createElement("div");
+        card.style.cssText="display:grid;grid-template-columns:28px 70px 1fr 1fr 1fr 60px auto;gap:6px;align-items:center;padding:8px 10px;background:rgba(0,0,0,.18);border:1px solid rgba(255,255,255,.08);border-radius:12px;";
+        card.innerHTML=`
+          <span style="font-size:11px;color:var(--muted);font-family:var(--mono)">${lv.isBreak?"—":++_playNo}</span>
+          <select data-k="type" style="padding:8px 6px;border-radius:10px;font-size:13px;${type==='break'?'color:var(--gold)':''}">
             <option value="level"${type==="level"?" selected":""}>Level</option>
             <option value="break"${type==="break"?" selected":""}>Break</option>
-          </select></td>
-          <td><input data-k="min" type="number" min="0" step="1" value="${min}"></td>
-          <td><input data-k="sb"  type="number" min="0" step="1" value="${sb}"  ${type==="break"?"disabled":""}></td>
-          <td><input data-k="bb"  type="number" min="0" step="1" value="${bb}"  ${type==="break"?"disabled":""}></td>
-          <td><select data-k="ante" ${type==="break"?"disabled":""}>
+          </select>
+          <div style="display:flex;flex-direction:column;gap:2px;">
+            <span style="font-size:10px;color:var(--muted);letter-spacing:.06em;">MIN</span>
+            <input data-k="min" type="number" min="0" step="1" value="${min}" style="padding:8px 6px;border-radius:10px;font-size:14px;width:100%;box-sizing:border-box;">
+          </div>
+          <div style="display:flex;flex-direction:column;gap:2px;">
+            <span style="font-size:10px;color:var(--muted);letter-spacing:.06em;">SB</span>
+            <input data-k="sb" type="number" min="0" step="1" value="${sb}" ${type==="break"?"disabled":""} style="padding:8px 6px;border-radius:10px;font-size:14px;width:100%;box-sizing:border-box;">
+          </div>
+          <div style="display:flex;flex-direction:column;gap:2px;">
+            <span style="font-size:10px;color:var(--muted);letter-spacing:.06em;">BB</span>
+            <input data-k="bb" type="number" min="0" step="1" value="${bb}" ${type==="break"?"disabled":""} style="padding:8px 6px;border-radius:10px;font-size:14px;width:100%;box-sizing:border-box;">
+          </div>
+          <select data-k="ante" ${type==="break"?"disabled":""} style="padding:8px 6px;border-radius:10px;font-size:13px;">
             <option value="NONE"${ante==="NONE"?" selected":""}>—</option>
             <option value="BB"${ante==="BB"?" selected":""}>BB</option>
-          </select></td>
-          <td><div class="btnrow" style="gap:8px;">
-            <button type="button" class="miniBtn ghost" data-act="up">↑</button>
-            <button type="button" class="miniBtn ghost" data-act="down">↓</button>
-          </div></td>
-          <td><button type="button" class="miniBtn danger" data-act="del">Del</button></td>`;
-        const typeSel=tr.querySelector("[data-k='type']");
+          </select>
+          <div style="display:flex;gap:4px;">
+            <button type="button" class="miniBtn ghost" data-act="up" style="padding:8px 9px;">↑</button>
+            <button type="button" class="miniBtn ghost" data-act="down" style="padding:8px 9px;">↓</button>
+            <button type="button" class="miniBtn danger" data-act="del" style="padding:8px 9px;">✕</button>
+          </div>`;
+        // sync hidden row when card inputs change
+        const syncHidden=()=>{
+          tr.querySelector("[data-k='type']").value=card.querySelector("[data-k='type']").value;
+          tr.querySelector("[data-k='min']").value=card.querySelector("[data-k='min']").value;
+          tr.querySelector("[data-k='sb']").value=card.querySelector("[data-k='sb']").value;
+          tr.querySelector("[data-k='bb']").value=card.querySelector("[data-k='bb']").value;
+          tr.querySelector("[data-k='ante']").value=card.querySelector("[data-k='ante']").value;
+        };
+        card.querySelectorAll("input,select").forEach(el=>el.addEventListener("change",syncHidden));
+        card.querySelectorAll("input,select").forEach(el=>el.addEventListener("input",syncHidden));
+        const typeSel=card.querySelector("[data-k='type']");
         typeSel.addEventListener("change",()=>{
           const isBr=typeSel.value==="break";
-          tr.querySelector("[data-k='sb']").disabled=isBr;
-          tr.querySelector("[data-k='bb']").disabled=isBr;
-          tr.querySelector("[data-k='ante']").disabled=isBr;
+          card.querySelector("[data-k='sb']").disabled=isBr;
+          card.querySelector("[data-k='bb']").disabled=isBr;
+          card.querySelector("[data-k='ante']").disabled=isBr;
+          syncHidden();
         });
-        tr.querySelector("[data-act='del']").addEventListener("click",()=>{
+        card.querySelector("[data-act='del']").addEventListener("click",()=>{
           const cur=readLevelsFromTable(); cur.splice(idx,1); renderLevelsTable(cur);
           $("structureJson").value=levelsToJsonText(cur);
         });
-        tr.querySelector("[data-act='up']").addEventListener("click",()=>{
-          const cur=readLevelsFromTable(); if (idx<=0) return;
+        card.querySelector("[data-act='up']").addEventListener("click",()=>{
+          const cur=readLevelsFromTable(); if(idx<=0)return;
           [cur[idx-1],cur[idx]]=[cur[idx],cur[idx-1]]; renderLevelsTable(cur);
           $("structureJson").value=levelsToJsonText(cur);
         });
-        tr.querySelector("[data-act='down']").addEventListener("click",()=>{
-          const cur=readLevelsFromTable(); if (idx>=cur.length-1) return;
+        card.querySelector("[data-act='down']").addEventListener("click",()=>{
+          const cur=readLevelsFromTable(); if(idx>=cur.length-1)return;
           [cur[idx+1],cur[idx]]=[cur[idx],cur[idx+1]]; renderLevelsTable(cur);
           $("structureJson").value=levelsToJsonText(cur);
         });
-        tbody.appendChild(tr);
+        container.appendChild(card);
       });
       $("structureJson").value=levelsToJsonText(levels);
     }
@@ -879,20 +1481,68 @@
       else if (ti.levelEndAt) ti.levelEndAt=Number(ti.levelEndAt)-60000;
       return st;
     }
+    function applyPlus60(st){
+      const ti=st.timer; if (!ti.isRunning) return st;
+      if (ti.isPaused) ti.pauseRemainingSec=(ti.pauseRemainingSec??0)+60;
+      else if (ti.levelEndAt) ti.levelEndAt=Number(ti.levelEndAt)+60000;
+      return st;
+    }
+    function applyBreak(st){
+      const ti=st.timer;
+      if (!ti.isRunning) return st;
+      if (ti.breakUntil&&nowMs()<ti.breakUntil) return st; // break already active
+      // save remaining level time
+      if (!ti.isPaused && ti.levelEndAt)
+        ti.savedRemainingSec=Math.max(0,Math.floor((Number(ti.levelEndAt)-nowMs())/1000));
+      else if (ti.isPaused)
+        ti.savedRemainingSec=Math.max(0,clampInt(ti.pauseRemainingSec,0));
+      else
+        ti.savedRemainingSec=0;
+      // start 10-min break countdown
+      ti.breakUntil=nowMs()+10*60*1000;
+      // pause the level timer
+      ti.isPaused=true; ti.pauseRemainingSec=ti.savedRemainingSec; ti.levelEndAt=null;
+      return st;
+    }
+    function applyFinishBreak(st){
+      const ti=st.timer;
+      if (!ti.breakUntil) return st;
+      ti.breakUntil=null;
+      // restore level — resume from savedRemainingSec
+      const rem=clampInt(ti.savedRemainingSec??ti.pauseRemainingSec??0,0);
+      ti.savedRemainingSec=null;
+      ti.isPaused=false; ti.isRunning=true;
+      ti.levelEndAt=nowMs()+rem*1000; ti.pauseRemainingSec=null;
+      return st;
+    }
 
     $("start").onclick   =async()=>{ try{ $("err").textContent=""; await saveWithReload(applyStart);   }catch(e){ $("err").textContent=e.message; } };
     $("pause").onclick   =async()=>{ try{ $("err").textContent=""; await saveWithReload(applyPause);   }catch(e){ $("err").textContent=e.message; } };
     $("resume").onclick  =async()=>{ try{ $("err").textContent=""; await saveWithReload(applyResume);  }catch(e){ $("err").textContent=e.message; } };
     $("next").onclick    =async()=>{ try{ $("err").textContent=""; await saveWithReload(applyNext);    }catch(e){ $("err").textContent=e.message; } };
     $("prev").onclick    =async()=>{ try{ $("err").textContent=""; await saveWithReload(applyPrev);    }catch(e){ $("err").textContent=e.message; } };
-    $("reset").onclick   =async()=>{ try{ $("err").textContent=""; await saveWithReload(applyReset);   }catch(e){ $("err").textContent=e.message; } };
-    $("minus60").onclick =async()=>{ try{ $("err").textContent=""; await saveWithReload(applyMinus60); }catch(e){ $("err").textContent=e.message; } };
+    $("reset").onclick=async()=>{
+      const ok=await confirm2(
+        "Сбросить таймер?",
+        "Уровень вернётся на 1, таймер остановится. Статистика и структура блайндов сохранятся."
+      );
+      if(!ok)return;
+      try{ $("err").textContent=""; await saveWithReload(applyReset); }catch(e){ $("err").textContent=e.message; }
+    };
+    $("minus60").onclick    =async()=>{ try{ $("err").textContent=""; await saveWithReload(applyMinus60);    }catch(e){ $("err").textContent=e.message; } };
+    $("plus60").onclick     =async()=>{ try{ $("err").textContent=""; await saveWithReload(applyPlus60);     }catch(e){ $("err").textContent=e.message; } };
+    $("breakBtn").onclick   =async()=>{ try{ $("err").textContent=""; await saveWithReload(applyBreak);      }catch(e){ $("err").textContent=e.message; } };
+    $("finishBreak").onclick=async()=>{ try{ $("err").textContent=""; await saveWithReload(applyFinishBreak);}catch(e){ $("err").textContent=e.message; } };
 
     // ===== auto-advance (leader only)
     async function autoAdvanceIfNeededLeader(){
       if (!hasLock||!roomId) return;
       const fresh=await loadStateFresh();
       const ti=fresh.timer;
+      // Auto-finish break when breakUntil expires
+      if (ti?.breakUntil && nowMs()>=ti.breakUntil){
+        await saveWithReload(applyFinishBreak); return;
+      }
       if (!ti?.isRunning||ti.isPaused||!ti.levelEndAt) return;
       if (nowMs()<ti.levelEndAt) return;
       await saveWithReload(st=>{
@@ -939,6 +1589,7 @@
     function renderAll(){
       if (!state) return;
       fillQuickFromState(); renderKpis(); renderTimerInfo();
+      renderPlayersTable();
       // Don't overwrite structure table while user is editing it (accordion open)
       if (!_acc || !_acc.classList.contains("open")) {
         renderLevelsTable(state.structure.levels);
@@ -961,7 +1612,7 @@
     async function bootRoom(){
       try{
         $("err").textContent=""; showForRoom(); setLinks(roomId); setSync("loading");
-        state=await loadStateFresh(); renderAll(); subscribeRealtime(); startLockLoop(); setSync("ok");
+        state=await loadStateFresh(); bindPlayersUi(); renderAll(); subscribeRealtime(); startLockLoop(); setSync("ok");
       }catch(e){ $("err").textContent=e.message; setSync("err"); }
     }
 

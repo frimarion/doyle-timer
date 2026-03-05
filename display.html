@@ -105,6 +105,17 @@
           </div>
         </div>
         <div class="nextBox"><div id="next" class="next">Next: —</div></div>
+        <div id="breakOverlay" style="display:none;position:absolute;inset:0;z-index:10;border-radius:var(--radius);
+          background:radial-gradient(900px 500px at 50% 40%, rgba(214,178,107,.22), transparent 60%),
+          rgba(7,7,10,.88);backdrop-filter:blur(6px);
+          display:none;flex-direction:column;align-items:center;justify-content:center;gap:14px;">
+          <div style="font-size:clamp(52px,5vw,90px);font-weight:950;letter-spacing:.08em;
+            color:rgba(242,210,138,.97);text-shadow:0 0 40px rgba(214,178,107,.35);">ПЕРЕРЫВ</div>
+          <div id="breakCountdown" style="font-size:clamp(48px,4.5vw,82px);font-weight:950;
+            color:rgba(243,243,246,.95);letter-spacing:.04em;">10:00</div>
+          <div style="font-size:14px;letter-spacing:.14em;text-transform:uppercase;
+            color:rgba(243,243,246,.55);">Продолжение через</div>
+        </div>
       </section>
       <aside class="card sidecard">
         <div class="sideTitle">Турнир</div>
@@ -120,7 +131,26 @@
     const sb=supabase.createClient(window.SUPABASE_URL,window.SUPABASE_ANON_KEY);
     const roomId=(new URLSearchParams(location.search).get('room')||'').trim();
     document.getElementById('roomTag').textContent=roomId?`room: ${roomId}`:'';
-    let state=null,lastSig="",pollInFlight=false,lastBlindsText="",lastHasRating=false;
+    let state=null,lastSig="",pollInFlight=false,lastBlindsText="",lastHasRating=false,lastLevelIndex=-1;
+
+    // ─── Sound on level change ───
+    function playLevelChangeSound(){
+      try{
+        const ctx=new (window.AudioContext||window.webkitAudioContext)();
+        // Two short beeps
+        [0,0.35].forEach((t,i)=>{
+          const o=ctx.createOscillator(), g=ctx.createGain();
+          o.connect(g); g.connect(ctx.destination);
+          o.frequency.value = i===0?880:1100;
+          o.type="sine";
+          g.gain.setValueAtTime(0,ctx.currentTime+t);
+          g.gain.linearRampToValueAtTime(0.4,ctx.currentTime+t+0.02);
+          g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+t+0.28);
+          o.start(ctx.currentTime+t); o.stop(ctx.currentTime+t+0.3);
+        });
+        setTimeout(()=>ctx.close(),1500);
+      }catch(e){}
+    }
     function clampInt(x,min=0){x=parseInt(x??0,10);return Number.isFinite(x)?Math.max(min,x):min;}
     function fmtInt(n){return NF.format(clampInt(n,0));}
     function nowMs(){return Date.now();}
@@ -133,10 +163,12 @@
       st.structure=st.structure||{levels:[]};
       st.timer=st.timer||{isRunning:false,isPaused:false,levelIndex:0,levelEndAt:null,pauseRemainingSec:null};
       st.tournament.startStack=clampInt(st.tournament.startStack,0);
+      st.tournament.lateRegUntilLevel=clampInt(st.tournament.lateRegUntilLevel??0,0);
       st.stats.registered=clampInt(st.stats.registered,0);
       st.stats.reentries=clampInt(st.stats.reentries,0);
       if(st.stats.busted!=null){st.stats.busted=clampInt(st.stats.busted,0);st.stats.busted=Math.min(st.stats.busted,st.stats.registered);st.stats.alive=Math.max(0,st.stats.registered-st.stats.busted);}
       else{st.stats.alive=Math.min(clampInt(st.stats.alive,0),st.stats.registered);}
+      if(st.timer.breakUntil!=null){const bts=Number(st.timer.breakUntil);if(!Number.isFinite(bts)||bts<1000000000000||bts>nowMs()+7200000)st.timer.breakUntil=null;}
       if(st.timer.levelEndAt!=null){const ts=Number(st.timer.levelEndAt);if(!Number.isFinite(ts)||ts<1000000000000||ts>nowMs()+86400000){st.timer.levelEndAt=null;st.timer.isRunning=false;}}
       if(!Array.isArray(st.structure.levels))st.structure.levels=[];
       st.structure.levels=st.structure.levels.map(l=>{const x={...l};x.isBreak=!!x.isBreak;x.label=(x.label??"").toString();x.min=clampInt(x.min,0);x.sb=clampInt(x.sb,0);x.bb=clampInt(x.bb,0);x.anteMode=(x.anteMode==="BB")?"BB":"NONE";return x;});
@@ -151,6 +183,8 @@
     function calcTotalChips(){const reg=clampInt(state?.stats?.registered??0,0),re=clampInt(state?.stats?.reentries??0,0),ss=clampInt(state?.tournament?.startStack??0,0);return(reg+re)*ss;}
     function getLevel(){return(state?.structure?.levels?.[state?.timer?.levelIndex??0])||{min:0,sb:0,bb:0,anteMode:"NONE"};}
     function remainingSec(){const ti=state?.timer;if(!ti?.isRunning)return null;if(ti.isPaused)return ti.pauseRemainingSec??null;if(!ti.levelEndAt)return null;return Math.max(0,Math.floor((ti.levelEndAt-nowMs())/1000));}
+    function breakRemainingSec(){const ti=state?.timer;if(!ti?.breakUntil)return null;return Math.max(0,Math.floor((Number(ti.breakUntil)-nowMs())/1000));}
+    function levelRemainingSec(){const ti=state?.timer;if(!ti?.isRunning)return null;if(ti.breakUntil)return clampInt(ti.savedRemainingSec??ti.pauseRemainingSec??0,0);if(ti.isPaused)return ti.pauseRemainingSec??null;if(!ti.levelEndAt)return null;return Math.max(0,Math.floor((ti.levelEndAt-nowMs())/1000));}
     function renderRating(){
       const card=document.getElementById("ratingCard"),gridEl=document.getElementById("ratingGrid");if(!card||!gridEl)return;
       const mainGrid=document.querySelector('main.grid'),r=state?.rating,active=!!r?.isActive&&Array.isArray(r?.payouts)&&r.payouts.length>0;
@@ -165,29 +199,85 @@
     function render(){
       if(!state)return;
       renderRating();
+      const curIdx=state.timer.levelIndex??0;
+      if(lastLevelIndex>=0 && curIdx!==lastLevelIndex && state.timer.isRunning){
+        playLevelChangeSound();
+      }
+      lastLevelIndex=curIdx;
       const lv=getLevel(),nextLv=state.structure.levels[state.timer.levelIndex+1];
       const playNo=(()=>{const idx=state?.timer?.levelIndex??0;let n=0;for(let i=0;i<=idx;i++)if(!state.structure.levels[i]?.isBreak)n++;return Math.max(1,n);})();
-      document.getElementById('level').textContent=lv.isBreak?(lv.label||'Перерыв'):`Level ${playNo}`;
       const ti=state.timer;
-      document.getElementById('status').textContent=!ti.isRunning?'STOPPED':(ti.isPaused?'PAUSED':'RUNNING');
+      const breakSec=breakRemainingSec();
+      const isOnBreak=breakSec!==null;
+
+      // Break overlay — show for button-break OR scheduled break level
+      const overlay=document.getElementById('breakOverlay');
+      const isScheduledBreak = lv.isBreak && ti.isRunning;
+      const showOverlay = isOnBreak || isScheduledBreak;
+      if(showOverlay){
+        overlay.style.display='flex';
+        const overlaySec = isOnBreak ? breakSec : remainingSec();
+        document.getElementById('breakCountdown').textContent=overlaySec!==null?fmtTime(overlaySec):'--:--';
+      } else {
+        overlay.style.display='none';
+      }
+
+      document.getElementById('level').textContent=lv.isBreak?(lv.label||'Перерыв'):`Level ${playNo}`;
+      document.getElementById('status').textContent=!ti.isRunning?'STOPPED':(isOnBreak||isScheduledBreak)?'BREAK':(ti.isPaused?'PAUSED':'RUNNING');
       const blindsLabel=document.getElementById('blindsLabel'),blindsMain=document.getElementById('blindsMain'),anteLine=document.getElementById('anteLine');
       if(lv.isBreak){blindsLabel.textContent='Break';if(lastBlindsText!=='—'){blindsMain.textContent='—';lastBlindsText='—';}anteLine.textContent='';}
       else{
         blindsLabel.textContent='Current blinds';
-        const newBlindsText=`${lv.sb} / ${lv.bb}`;
+        const newBlindsText=`${NF.format(lv.sb)} / ${NF.format(lv.bb)}`;
         if(newBlindsText!==lastBlindsText){blindsMain.textContent=newBlindsText;lastBlindsText=newBlindsText;const hasRating=!!(state?.rating?.isActive&&Array.isArray(state?.rating?.payouts)&&state.rating.payouts.length);fitToWidth(blindsMain,hasRating?148:172,hasRating?56:64);}
-        if(lv.anteMode==="BB")anteLine.innerHTML=`<span class="gold">BB Ante</span> ${lv.bb}`;else anteLine.textContent='';
+        if(lv.anteMode==="BB")anteLine.innerHTML=`<span class="gold">BB Ante</span> ${NF.format(lv.bb)}`;else anteLine.textContent='';
       }
-      const rem=remainingSec(),timeEl=document.getElementById('time');
+      // show level remaining (frozen during break), not break countdown
+      const rem=(isOnBreak||isScheduledBreak)?levelRemainingSec():remainingSec();
+      const timeEl=document.getElementById('time');
       timeEl.textContent=rem===null?'--:--':fmtTime(rem);
       document.getElementById('durationPill').textContent=lv.min?`${lv.min} min`:'—';
-      if(rem!==null&&rem<=60){timeEl.style.color="#ff6b6b";timeEl.style.textShadow="0 0 44px rgba(255,80,80,.55)";}else{timeEl.style.color="";timeEl.style.textShadow="";}
+      if(!isOnBreak&&!isScheduledBreak&&rem!==null&&rem<=30){timeEl.style.color="#ff6b6b";timeEl.style.textShadow="0 0 44px rgba(255,80,80,.55)";}
+      else{timeEl.style.color="";timeEl.style.textShadow="";}
+
+
       const nextEl=document.getElementById('next');
       if(nextLv){if(nextLv.isBreak)nextEl.innerHTML=`Next: <b>${nextLv.label||'Break'}</b>`;else{const parts=[NF.format(nextLv.sb),NF.format(nextLv.bb)];if(nextLv.anteMode==="BB")parts.push(NF.format(nextLv.bb));nextEl.innerHTML=`Next: <b>${parts.join(' / ')}</b>`;}}else nextEl.textContent='Next: —';
       const st=state.stats||{};
+      const lateRegLvl=clampInt(state.tournament?.lateRegUntilLevel??0,0);
+      const lateRegHtml=lateRegLvl>0?statRow('Поздняя рег. до уровня',String(lateRegLvl)):'';
+      // "перерыв через" — find next break in structure, calc total time until it
+      let breakSoonHtml='';
+      if(!isOnBreak && !isScheduledBreak && ti.isRunning && !ti.isPaused){
+        const levels=state.structure.levels;
+        const curIdx2=state.timer.levelIndex??0;
+        // find next break index after current level
+        let nextBreakIdx=-1;
+        for(let i=curIdx2+1;i<levels.length;i++){
+          if(levels[i]?.isBreak){nextBreakIdx=i;break;}
+        }
+        if(nextBreakIdx>=0){
+          // sum up: remaining time on current level + full duration of each level between now and break
+          let totalSec=Math.max(0,remainingSec()??0);
+          for(let i=curIdx2+1;i<nextBreakIdx;i++){
+            totalSec+=clampInt(levels[i]?.min??0,0)*60;
+          }
+          // format: only hours and minutes, no seconds
+          const totalMins=Math.ceil(totalSec/60);
+          let bStr;
+          if(totalMins>=60){
+            const h=Math.floor(totalMins/60), m=totalMins%60;
+            bStr=m>0?`${h} ч ${m} мин`:`${h} ч`;
+          } else {
+            bStr=`${totalMins} мин`;
+          }
+          breakSoonHtml=statRow('☕ Перерыв через', bStr);
+        }
+      }
       document.getElementById('stats').innerHTML=
         statRow('В игре',`${st.alive??0} из ${st.registered??0}`)+
-        statRow('Ре-энтри',NF.format(st.reentries??0))+
+        lateRegHtml+
+        breakSoonHtml+
         statRow('Стартовый стек',NF.format(state.tournament?.startStack??0))+
         statRow('Средний стек',NF.format(calcAvg()),true)+
         statRow('Фишек в игре',NF.format(calcTotalChips()),true);
@@ -200,7 +290,28 @@
     let displayAdvanceInFlight=false;
     async function displayAutoAdvance(){
       if(displayAdvanceInFlight||!roomId||!state)return;
-      const ti=state.timer;if(!ti?.isRunning||ti.isPaused||!ti.levelEndAt)return;if(nowMs()<ti.levelEndAt)return;
+      const ti=state.timer;
+      // Auto-finish break
+      if(ti?.breakUntil&&nowMs()>=ti.breakUntil){
+        displayAdvanceInFlight=true;
+        try{
+          const{data,error}=await sb.from('rooms').select('state').eq('room_id',roomId).single();
+          if(error)throw error;
+          const fresh=normalizeState(data.state);
+          if(fresh.timer?.breakUntil&&nowMs()>=fresh.timer.breakUntil){
+            const next=structuredClone(fresh),t=next.timer;
+            const rem=clampInt(t.savedRemainingSec??t.pauseRemainingSec??0,0);
+            t.breakUntil=null;t.savedRemainingSec=null;t.isPaused=false;t.isRunning=true;
+            t.levelEndAt=nowMs()+rem*1000;t.pauseRemainingSec=null;
+            const{error:se}=await sb.from('rooms').update({state:next}).eq('room_id',roomId);
+            if(se)throw se;
+            state=next;lastSig=JSON.stringify(state);render();
+          }
+        }catch(e){console.warn('break-end failed',e);}
+        finally{displayAdvanceInFlight=false;}
+        return;
+      }
+      if(!ti?.isRunning||ti.isPaused||!ti.levelEndAt)return;if(nowMs()<ti.levelEndAt)return;
       displayAdvanceInFlight=true;
       try{
         const{data,error}=await sb.from('rooms').select('state').eq('room_id',roomId).single();if(error)throw error;
