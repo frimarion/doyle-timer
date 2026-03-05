@@ -807,9 +807,7 @@
     }
 
     function parseRegList(text){
-      const lines=(text||"").split(/
-?
-/).map(x=>x.trim()).filter(Boolean);
+      const lines=(text||"").split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
       const out=[];
       for (const line of lines){
         let s=line.replace(/^\s*(?:\d{1,3}\s*[\.\)\-]|[\d0-9]️⃣)\s*/u,"").trim();
@@ -822,9 +820,7 @@
     }
 
     function parseResultsPost(text){
-      const lines=(text||"").split(/
-?
-/).map(x=>x.trim()).filter(Boolean);
+      const lines=(text||"").split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
       const rows=[];
       for (const line of lines){
         const m=line.match(/^\s*(\d{1,3})\s*(?:[️⃣⃣]|[\.\)])\s*(.+)$/u);
@@ -884,16 +880,11 @@
       const players=st.players.map(p=>({...p}));
       if (alive===1){ const last=players.find(p=>p.present&&p.status!=="busted"); if (last&&last.place==null) last.place=1; }
       const finishedList=players.filter(p=>p.present&&p.place!=null).sort((a,b)=>(a.place??999)-(b.place??999));
-      const lines=finishedList.map(p=>{ const ko=clampInt(p.ko??0,0); return ko>0?`${placeEmoji(clampInt(p.place,0))} ${p.name} (${ko} ko)`:`${placeEmoji(clampInt(p.place,0))} ${p.name}`; }).join("
-");
+      const lines=finishedList.map(p=>{ const ko=clampInt(p.ko??0,0); return ko>0?`${placeEmoji(clampInt(p.place,0))} ${p.name} (${ko} ko)`:`${placeEmoji(clampInt(p.place,0))} ${p.name}`; }).join("\n");
       const itm=Array.isArray(st?.rating?.payouts)?st.rating.payouts.length:0;
-      const header=[`РЕЗУЛЬТАТЫ ТУРНИРА ${dateStr}`,``,`Подтверждено: ${reg}`,`Вылетело: ${busted}`,`В игре: ${alive}`,...(itm>0?[`В «призах»: ${itm} участников`]:[]),``,`Всем спасибо за участие!`,``].join("
-");
-      const footer=[``,`По всем вопросам: @doylemsk`].join("
-");
-      if (!lines) return header+`
-(Пока нет заполненных мест.)
-`+footer;
+      const header=[`РЕЗУЛЬТАТЫ ТУРНИРА ${dateStr}`,``,`Подтверждено: ${reg}`,`Вылетело: ${busted}`,`В игре: ${alive}`,...(itm>0?[`В «призах»: ${itm} участников`]:[]),``,`Всем спасибо за участие!`,``].join("\n");
+      const footer=[``,`По всем вопросам: @doylemsk`].join("\n");
+      if (!lines) return header+"\n(Пока нет заполненных мест.)\n"+footer;
       return header+lines+footer;
     }
 
@@ -1120,7 +1111,7 @@
             </div>
             <div style="display:flex;gap:10px;align-items:center;padding:10px 12px;border-radius:12px;
               background:rgba(214,178,107,.08);border:1px solid rgba(214,178,107,.18);margin-bottom:14px;font-size:13px;">
-              <span style="color:var(--muted);">${entries === 1 ? "1 вход" : \`\${entries} входа (1 + \${re} re)\`}</span>
+              <span style="color:var(--muted);">${entries === 1 ? "1 вход" : (entries + " входа (1 + " + re + " re)")}</span>
               <span style="margin-left:auto;font-weight:900;font-family:var(--mono);color:var(--gold2);">= \${expectedStr}</span>
             </div>
             <div style="font-size:11px;color:var(--muted);margin-bottom:8px;letter-spacing:.07em;text-transform:uppercase;">Платежи</div>
