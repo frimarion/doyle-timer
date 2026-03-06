@@ -53,6 +53,8 @@
     .statLabel{font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:rgba(243,243,246,.55);font-weight:700;}
     .statValue{font-size:clamp(26px,2.2vw,36px);font-weight:950;color:rgba(243,243,246,.97);letter-spacing:.02em;line-height:1.1;}
     .statValue.gold{color:rgba(242,210,138,.97);text-shadow:0 0 18px rgba(214,178,107,.22);}
+    .statValue.danger{color:var(--danger);text-shadow:0 0 18px rgba(255,107,107,.28);animation:lateRegPulse 1.2s ease-in-out infinite;}
+    @keyframes lateRegPulse{0%,100%{opacity:1;}50%{opacity:.68;}}
     /* RATING */
     .ratingcard{padding:14px 14px 12px;display:flex;flex-direction:column;min-width:0;}
     #ratingMeta{display:none !important;}
@@ -197,7 +199,21 @@
       for(let row=0;row<rows;row++){for(const idx of[row,row+rows]){if(idx<P){const place=idx+1,pl=document.createElement("div"),pts=document.createElement("div");pl.className="rCellPlace "+mc(place);pl.textContent=String(place);pts.className="rCellPts "+mc(place);pts.textContent=fmtInt(payouts[idx]);frag.appendChild(pl);frag.appendChild(pts);}else{frag.appendChild(document.createElement("div"));frag.appendChild(document.createElement("div"));}}}
       gridEl.innerHTML="";gridEl.appendChild(frag);
     }
-    function statRow(label,value,gold=false){return`<div class="statRow"><div class="statLabel">${label}</div><div class="statValue${gold?' gold':''}">${value}</div></div>`;}
+    function statRow(label,value,gold=false,extraClass=''){return`<div class="statRow"><div class="statLabel">${label}</div><div class="statValue${gold?' gold':''}${extraClass?` ${extraClass}`:''}">${value}</div></div>`;}
+    function lateRegRemainingSec(){
+      const ti=state?.timer||{};
+      const levels=Array.isArray(state?.structure?.levels)?state.structure.levels:[];
+      const lateRegLvl=clampInt(state?.tournament?.lateRegUntilLevel??0,0);
+      if(!lateRegLvl||!levels.length)return 0;
+      const lastLateRegIdx=lateRegLvl-1;
+      const curIdx=clampInt(ti.levelIndex??0,0);
+      if(curIdx>lastLateRegIdx)return 0;
+      let totalSec=Math.max(0,(breakRemainingSec()!==null||levels[curIdx]?.isBreak)?(levelRemainingSec()??0):(remainingSec()??0));
+      for(let i=curIdx+1;i<=lastLateRegIdx&&i<levels.length;i++){
+        totalSec+=clampInt(levels[i]?.min??0,0)*60;
+      }
+      return totalSec;
+    }
     function render(){
       if(!state)return;
       renderRating();
@@ -249,7 +265,9 @@
       const lateRegLvl=clampInt(state.tournament?.lateRegUntilLevel??0,0);
       const curLevelNum=clampInt((ti.levelIndex??0)+1,1);
       const showLateReg=lateRegLvl>0 && curLevelNum<=lateRegLvl;
-      const lateRegHtml=showLateReg?statRow('Поздняя рег. до уровня',String(lateRegLvl)):'';
+      const lateRegRemainSec=lateRegRemainingSec();
+      const isLastLateRegLevel=showLateReg && curLevelNum===lateRegLvl;
+      const lateRegHtml=showLateReg?statRow('Поздняя регистрация',fmtTime(lateRegRemainSec),false,isLastLateRegLevel?'danger':''):'';
       // "перерыв через" — find next break in structure, calc total time until it
       let breakSoonHtml='';
       if(!isOnBreak && !isScheduledBreak && ti.isRunning && !ti.isPaused){
