@@ -64,7 +64,34 @@
     textarea{ font-family:var(--mono); min-height:180px; line-height:1.35; font-size:13.5px; }
     input:focus, textarea:focus, select:focus{ border-color:rgba(214,178,107,.55); box-shadow:0 0 0 4px rgba(214,178,107,.12); }
     .row2{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
-    @media(max-width:520px){ .row2{ grid-template-columns:1fr; } header.top{ align-items:flex-start; } }
+    @media(max-width:520px){
+      .row2{ grid-template-columns:1fr; }
+      header.top{ align-items:flex-start; }
+
+      /* Structure editor — mobile-friendly toolbar like Poker Clock apps */
+      #tabStructure .btnrow{
+        position: sticky;
+        bottom: 10px;
+        z-index: 30;
+        padding: 10px;
+        border-radius: 16px;
+        background: rgba(0,0,0,.38);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255,255,255,.10);
+        justify-content: space-between;
+      }
+      #addLevel, #addBreak{
+        flex: 1 1 0;
+        padding: 12px 10px;
+        font-size: 14px;
+        font-weight: 800;
+        border-radius: 16px;
+      }
+      #addBreak{ border-color: rgba(255,255,255,.18); }
+      #btnStructureSave, #btnStructureReset{
+        flex: 1 1 100%;
+      }
+    }
     .btnrow{ display:flex; flex-wrap:wrap; gap:10px; align-items:center; }
     button{
       cursor:pointer; border-radius:14px; border:1px solid var(--stroke2);
@@ -101,6 +128,8 @@
     }
     .sticky .inner{ max-width:980px; margin:0 auto; display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:space-between; }
     .sticky .inner .left, .sticky .inner .right{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+    /* hide sync */
+    #syncText{display:none !important;}
     .syncPill{
       font-size:12px; letter-spacing:.10em; text-transform:uppercase; color:var(--muted);
       border:1px solid rgba(255,255,255,.12); border-radius:999px; padding:10px 12px;
@@ -159,6 +188,21 @@
     .modal-title{font-size:19px;font-weight:900;color:rgba(243,243,246,.97);margin-bottom:8px;}
     .modal-body{font-size:14px;color:rgba(243,243,246,.65);line-height:1.55;margin-bottom:22px;}
     .modal-btns{display:flex;gap:10px;justify-content:flex-end;}
+    .moneyModalHead{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:14px;}
+    .moneyModalMeta{font-size:12px;color:rgba(243,243,246,.58);line-height:1.45;}
+    .moneyInput{width:100%;font-size:34px;font-weight:900;letter-spacing:.02em;border-radius:18px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.04);color:#fff;padding:16px 18px;outline:none;box-sizing:border-box;text-align:center;margin:6px 0 14px;}
+    .moneyInput:focus{border-color:rgba(212,175,55,.55);box-shadow:0 0 0 3px rgba(212,175,55,.14);}
+    .moneyQuickRow{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px;}
+    .moneyQuickBtn{border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:rgba(243,243,246,.88);border-radius:14px;padding:11px 10px;font-size:13px;font-weight:800;cursor:pointer;}
+    .moneyQuickBtn:hover{background:rgba(255,255,255,.08);}
+    .moneyMethodRow{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px;}
+    .moneyMethodBtn{border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:rgba(243,243,246,.9);border-radius:14px;padding:12px 10px;font-size:14px;font-weight:800;cursor:pointer;}
+    .moneyMethodBtn.active{border-color:rgba(212,175,55,.55);background:rgba(212,175,55,.16);box-shadow:0 0 0 1px rgba(212,175,55,.2) inset;}
+    @media(max-width:560px){
+      .moneyQuickRow{grid-template-columns:repeat(2,1fr);}
+      .moneyMethodRow{grid-template-columns:1fr;}
+      .moneyInput{font-size:30px;}
+    }
     /* rooms list */
     .roomsList{display:flex;flex-direction:column;gap:8px;margin-top:14px;}
     .roomRow{display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:14px;background:rgba(0,0,0,.22);border:1px solid rgba(255,255,255,.08);}
@@ -189,6 +233,31 @@
     .methodBtn.active-card{background:rgba(89,180,255,.18);border-color:rgba(89,180,255,.45);color:#7ecfff;}
     .methodBtn.active-cash{background:rgba(89,255,161,.14);border-color:rgba(89,255,161,.38);color:#59ffa1;}
     .methodBtn.active-transfer{background:rgba(214,178,107,.18);border-color:rgba(214,178,107,.45);color:var(--gold2);}
+
+    .payToolbar{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;align-items:center;}
+    .payBtns{display:flex;gap:6px;flex-wrap:wrap;}
+    .payInlineInput{width:140px;max-width:100%;padding:8px 10px;border-radius:10px;font-size:13px;font-family:var(--mono);}
+    .miniBtn.ok{background:rgba(89,255,161,.14);border-color:rgba(89,255,161,.40);color:var(--ok);}
+    @media(max-width:640px){
+      .payToolbar{display:grid;grid-template-columns:1fr;}
+      .payBtns{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));}
+      .payBtns .methodBtn, .payBtns .miniBtn{width:100%;justify-content:center;}
+      .payInlineInput{width:100%;}
+    }
+
+
+    .levelCard{display:grid;grid-template-columns:28px 70px 1fr 1fr 1fr 64px auto;gap:6px;align-items:center;padding:8px 10px;background:rgba(0,0,0,.18);border:1px solid rgba(255,255,255,.08);border-radius:12px;}
+    .levelActions{display:flex;gap:4px;}
+    @media(max-width:640px){
+      .levelCard{grid-template-columns:28px 1fr 1fr;gap:8px;padding:10px;}
+      .levelCard .typeSel{grid-column:2 / 4;}
+      .levelCard .fieldMin,.levelCard .fieldSb,.levelCard .fieldBb,.levelCard .fieldAnte{grid-column:auto;}
+      .levelCard .levelActions{grid-column:1 / -1;display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:4px;}
+      .levelCard .levelActions .miniBtn{width:100%;padding:10px 0;font-size:14px;}
+      #tabStructure .btnrow{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+      #tabStructure .btnrow > button{width:100%;}
+    }
+
   </style>
 </head>
 <body>
@@ -328,6 +397,27 @@
           </div>
         </div>
 
+        <div class="ratingBox">
+          <div class="ratingHead">
+            <div>
+              <div class="sideTitle" style="margin:0;">Рейтинг</div>
+              <div class="muted" style="margin-top:4px;">Появится на дисплее после «Рассчитать рейтинг»</div>
+            </div>
+            <button id="btnCalcRating" type="button" class="ghost">Рассчитать рейтинг</button>
+          </div>
+          <div class="row2" style="margin-top:10px;">
+            <div class="field">
+              <label>Entries (всего входов, включая ре-энтри)</label>
+              <input id="ratingEntries" type="number" min="1" step="1" inputmode="numeric" value="1"/>
+            </div>
+            <div class="field">
+              <label>r (коэф. убывания)</label>
+              <input id="ratingR" type="number" min="0.1" max="0.99" step="0.01" inputmode="decimal" value="0.8"/>
+            </div>
+          </div>
+
+        </div>
+
         <details style="margin-top:12px;">
           <summary>Импорт списка игроков (из Telegram)</summary>
           <div class="sub">Вставь нумерованный список (по 1 игроку в строке). Поддерживает "1.", "1)", "1️⃣".</div>
@@ -341,7 +431,7 @@
 
         <details style="margin-top:12px;">
           <summary>Игроки (быстрое управление)</summary>
-          <div class="sub">Отметь «Пришел», затем кнопка BUSTED спросит KO, отметит вылет и обновит «В игре» на дисплее.</div>
+          <div class="sub">Отметь «Пришёл». Когда игрок вылетел — нажми BUSTED: появится ввод KO, игрок пометится как вылетевший, а «В игре» на дисплее обновится автоматически.</div>
           <div class="btnrow" style="margin-top:10px;">
             <button id="btnPlayerPlus" type="button">+ Добавить игрока</button>
             <span class="sub mono" id="playersQuickInfo" style="margin-left:auto;"></span>
@@ -354,15 +444,7 @@
           </div>
         </details>
 
-        <details style="margin-top:12px;">
-          <summary>Импорт результатов (пост турнира)</summary>
-          <div class="sub">Вставь пост с местами. Поддерживает "1️⃣", "4.", "(14 ko)".</div>
-          <textarea id="resultsImportText" spellcheck="false" style="min-height:160px;"></textarea>
-          <div class="btnrow" style="margin-top:10px;">
-            <button id="btnResultsApply" type="button">Применить результаты</button>
-            <span class="sub mono" id="resultsImportInfo" style="margin-left:auto;"></span>
-          </div>
-        </details>
+        
 
         <details style="margin-top:12px;">
           <summary>Пост для Telegram</summary>
@@ -389,26 +471,7 @@
 
         <div class="divider"></div>
 
-        <div class="ratingBox">
-          <div class="ratingHead">
-            <div>
-              <div class="sideTitle" style="margin:0;">Рейтинг</div>
-              <div class="muted" style="margin-top:4px;">Появится на дисплее после «Рассчитать рейтинг»</div>
-            </div>
-            <button id="btnCalcRating" type="button" class="ghost">Рассчитать рейтинг</button>
-          </div>
-          <div class="row2" style="margin-top:10px;">
-            <div class="field">
-              <label>Entries (всего входов, включая ре-энтри)</label>
-              <input id="ratingEntries" type="number" min="1" step="1" inputmode="numeric" value="1"/>
-            </div>
-            <div class="field">
-              <label>r (коэф. убывания)</label>
-              <input id="ratingR" type="number" min="0.1" max="0.99" step="0.01" inputmode="decimal" value="0.8"/>
-            </div>
-          </div>
-
-        </div>
+        
       </section>
 
       <section id="screenStructure" class="card" style="display:none;">
@@ -472,6 +535,30 @@
     </div>
   </div>
 
+  <!-- payment amount modal -->
+  <div id="paymentAmountModal" class="modal-backdrop" style="display:none;" role="dialog" aria-modal="true">
+    <div class="modal-box">
+      <div class="moneyModalHead">
+        <div>
+          <div class="modal-title" id="paymentAmountTitle">Сумма оплаты</div>
+          <div class="moneyModalMeta" id="paymentAmountMeta"></div>
+        </div>
+      </div>
+      <input id="paymentAmountInput" class="moneyInput" type="number" min="0" step="100" inputmode="numeric" />
+      <div class="moneyQuickRow">
+        <button type="button" class="moneyQuickBtn" data-quick="full">100%</button>
+        <button type="button" class="moneyQuickBtn" data-quick="half">50%</button>
+        <button type="button" class="moneyQuickBtn" data-quick="rest">Остаток</button>
+        <button type="button" class="moneyQuickBtn" data-quick="zero">0</button>
+      </div>
+      <div class="moneyMethodRow" id="paymentAmountMethods"></div>
+      <div class="modal-btns">
+        <button id="paymentAmountCancel" type="button" class="miniBtn ghost">Отмена</button>
+        <button id="paymentAmountOk" type="button" class="miniBtn ok">Сохранить</button>
+      </div>
+    </div>
+  </div>
+
   <!-- confirm modal -->
   <div id="confirmModal" class="modal-backdrop" style="display:none;" role="dialog" aria-modal="true">
     <div class="modal-box">
@@ -528,6 +615,8 @@
 
     // ===== state
     let state = null;
+    let paymentUiDrafts = new Map();
+
 
     function genRoomId(len=6){
       const abc="ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; let out="";
@@ -739,17 +828,22 @@
 
     // FIX #2: global mutex — prevents race conditions from steppers, commitQuickFields, auto-tick
     let saveInFlight = false;
+    let saveQueue = Promise.resolve();
+    let suppressRealtimeUntil = 0;
     async function saveWithReload(mutator){
-      if (saveInFlight) return;
-      saveInFlight = true;
-      try{
-        const fresh=await loadStateFresh();
-        const clone=structuredClone(fresh);
-        const next=normalizeState(mutator(clone)||clone);
-        await saveState(next);
-        state=next; renderAll(); setSync("saved");
-        setTimeout(()=>{ if ($("syncText").textContent.includes("saved")) setSync("ok"); },500);
-      } finally { saveInFlight=false; }
+      saveQueue = saveQueue.then(async ()=>{
+        saveInFlight = true;
+        try{
+          const fresh=await loadStateFresh();
+          const clone=structuredClone(fresh);
+          const next=normalizeState(mutator(clone)||clone);
+          suppressRealtimeUntil = Date.now() + 1500;
+          await saveState(next);
+          state=next; renderAll(); setSync("saved");
+          setTimeout(()=>{ if ($("syncText").textContent.includes("saved")) setSync("ok"); },500);
+        } finally { saveInFlight=false; }
+      }).catch(err=>{ console.error(err); setSync("error"); });
+      return saveQueue;
     }
 
     function setSync(x){ $("syncText").textContent=`sync: ${x}`; }
@@ -915,8 +1009,11 @@
           <td>${p.name}</td>
           <td><input type="checkbox" data-act="present" ${p.present?"checked":""}/></td>
           <td class="mono" style="white-space:nowrap;">
-            <button type="button" class="miniBtn ghost" data-act="reentry" ${!p.present?"disabled":""}
-              style="padding:6px 9px;font-size:12px;font-weight:900;">R${re>0?` ×${re}`:""}</button>
+            <button type="button" class="miniBtn ghost" data-act="rePlus" ${!p.present?"disabled":""}
+              style="padding:6px 9px;font-size:12px;font-weight:900;">R+</button>
+            <button type="button" class="miniBtn ghost" data-act="reMinus" ${(!p.present||re<=0)?"disabled":""}
+              style="padding:6px 9px;font-size:12px;font-weight:900;margin-left:6px;">R−</button>
+            <span style="margin-left:8px;opacity:.9;">${re>0?`×${re}`:""}</span>
           </td>
           <td class="mono">${clampInt(p.ko??0,0)}</td>
           <td class="mono">${status}</td>
@@ -934,11 +1031,19 @@
             return computeStatsFromPlayers(st);
           });
         });
-        tr.querySelector("[data-act='reentry']")?.addEventListener("click",async()=>{
+        tr.querySelector("[data-act='rePlus']")?.addEventListener("click",async()=>{
           await saveWithReload(st=>{
             ensurePlayers(st);
             const t=st.players.find(x=>keyName(x.name)===keyName(p.name));
             if (t){ t.reentries=clampInt(t.reentries??0,0)+1; t.status="playing"; }
+            return computeStatsFromPlayers(st);
+          });
+        });
+        tr.querySelector("[data-act='reMinus']")?.addEventListener("click",async()=>{
+          await saveWithReload(st=>{
+            ensurePlayers(st);
+            const t=st.players.find(x=>keyName(x.name)===keyName(p.name));
+            if (t){ t.reentries=Math.max(0,clampInt(t.reentries??0,0)-1); }
             return computeStatsFromPlayers(st);
           });
         });
@@ -997,263 +1102,432 @@
       renderPaymentSection();
     }
 
+    // ===== payment amount modal ─────────────────────────────────────────────
+    function openPaymentAmountModal({playerName, method, defaultAmount=0, fullAmount=0, halfAmount=0, restAmount=0}){
+      return new Promise((resolve)=>{
+        const backdrop = document.getElementById('paymentAmountModal');
+        const title = document.getElementById('paymentAmountTitle');
+        const meta = document.getElementById('paymentAmountMeta');
+        const input = document.getElementById('paymentAmountInput');
+        const methodsWrap = document.getElementById('paymentAmountMethods');
+        const btnOk = document.getElementById('paymentAmountOk');
+        const btnCancel = document.getElementById('paymentAmountCancel');
+        if(!backdrop || !title || !meta || !input || !methodsWrap || !btnOk || !btnCancel){
+          resolve(null);
+          return;
+        }
+
+        let activeMethod = method || 'card';
+        const methodsHtml = METHODS.map(m=>`<button type="button" class="moneyMethodBtn ${activeMethod===m.key?'active':''}" data-method="${m.key}">${m.label} ${m.title}</button>`).join('');
+        methodsWrap.innerHTML = methodsHtml;
+        title.textContent = `Оплата: ${playerName || 'игрок'}`;
+        meta.textContent = `По умолчанию указана ожидаемая сумма. Её можно изменить вручную.`;
+        input.value = String(clampInt(defaultAmount,0));
+
+        function setActiveMethod(next){
+          activeMethod = next;
+          methodsWrap.querySelectorAll('[data-method]').forEach(el=>{
+            el.classList.toggle('active', el.dataset.method===activeMethod);
+          });
+        }
+
+        function cleanup(result){
+          backdrop.style.display='none';
+          backdrop.removeEventListener('click', onBackdrop);
+          document.removeEventListener('keydown', onKey);
+          btnOk.onclick = null;
+          btnCancel.onclick = null;
+          methodsWrap.querySelectorAll('[data-method]').forEach(el=>el.onclick=null);
+          backdrop.querySelectorAll('[data-quick]').forEach(el=>el.onclick=null);
+          resolve(result);
+        }
+        function onBackdrop(e){ if(e.target===backdrop) cleanup(null); }
+        function onKey(e){
+          if(backdrop.style.display==='none') return;
+          if(e.key==='Escape'){ e.preventDefault(); cleanup(null); }
+          else if(e.key==='Enter'){ e.preventDefault(); btnOk.click(); }
+        }
+
+        methodsWrap.querySelectorAll('[data-method]').forEach(el=>{
+          el.onclick = ()=> setActiveMethod(el.dataset.method||'card');
+        });
+        backdrop.querySelectorAll('[data-quick]').forEach(el=>{
+          el.onclick = ()=>{
+            const q = el.dataset.quick;
+            if(q==='full') input.value = String(clampInt(fullAmount,0));
+            else if(q==='half') input.value = String(clampInt(halfAmount,0));
+            else if(q==='rest') input.value = String(clampInt(restAmount,0));
+            else if(q==='zero') input.value = '0';
+            input.focus();
+            input.select();
+          };
+        });
+        btnCancel.onclick = ()=> cleanup(null);
+        btnOk.onclick = ()=> cleanup({ amount: clampInt(String(input.value??'').trim() || '0',0), method: activeMethod });
+
+        backdrop.addEventListener('click', onBackdrop);
+        document.addEventListener('keydown', onKey);
+        backdrop.style.display='flex';
+        setActiveMethod(activeMethod);
+        setTimeout(()=>{ input.focus(); input.select(); }, 0);
+      });
+    }
+
     // ===== Payment section ====================================================
     const METHODS = [
-      {key:"card",     label:"💳 Карта",   cls:"active-card"},
-      {key:"cash",     label:"💵 Наличные", cls:"active-cash"},
-      {key:"transfer", label:"📲 Перевод",  cls:"active-transfer"},
+      {key:"card",     label:"💳", title:"Карта",    cls:"active-card"},
+      {key:"cash",     label:"💵", title:"Наличные", cls:"active-cash"},
+      {key:"transfer", label:"📲", title:"Перевод",  cls:"active-transfer"},
     ];
 
     function getPayments(p){ return Array.isArray(p.payments)?p.payments:[]; }
-    function totalPaid(p){ return getPayments(p).reduce((s,x)=>s+(clampInt(x.amount,0)),0); }
-    function calcExpected(p){
-      // player.buyIn overrides tournament default; null/undefined = use default; -1 = free
-      const defaultBuyIn=clampInt(state?.tournament?.defaultBuyIn??1000,0);
-      const buyIn=p.buyIn==null ? defaultBuyIn : clampInt(p.buyIn,0);
-      const entries=1+clampInt(p.reentries??0,0);
-      return buyIn*entries;
-    }
+    function totalPaid(p){ return getPayments(p).reduce((s,x)=>s+clampInt(x.amount,0),0); }
     function effectiveBuyIn(p){
       const defaultBuyIn=clampInt(state?.tournament?.defaultBuyIn??1000,0);
-      return p.buyIn==null ? defaultBuyIn : clampInt(p.buyIn,0);
+      return p?.buyIn==null ? defaultBuyIn : clampInt(p.buyIn,0);
+    }
+    function effectiveFreeEntries(p){
+      const entries = 1 + clampInt(p?.reentries??0,0);
+      return Math.max(0, Math.min(entries, clampInt(p?.freeEntries??0,0)));
+    }
+    function calcExpected(p){
+      const buyIn=effectiveBuyIn(p);
+      const entries=1+clampInt(p?.reentries??0,0);
+      const freeEntries=effectiveFreeEntries(p);
+      return Math.max(0, entries-freeEntries) * buyIn;
     }
     function payStatusColor(p){
       const paid=totalPaid(p), expected=calcExpected(p);
+      if (expected===0) return "green";
       if (paid<=0) return "red";
-      if (expected>0 && paid>=expected) return "green";
+      if (paid>=expected) return "green";
       return "yellow";
     }
     function payStatusText(p){
       const paid=totalPaid(p), parts=getPayments(p);
       const expected=calcExpected(p);
-      const re=clampInt(p.reentries??0,0);
+      const re=clampInt(p?.reentries??0,0);
       const entries=1+re;
-      const buyIn=clampInt(p.buyIn??0,0);
-      // entries label
-      const entriesLabel = re>0 ? `${entries} входа (1+${re} re)` : `1 вход`;
-      // expected label
-      const expectedLabel = buyIn>0
-        ? (re>0 ? `${NF.format(buyIn)} × ${entries} = ${NF.format(expected)}` : `${NF.format(buyIn)}`)
-        : "взнос не указан";
-      if (paid<=0) return `${entriesLabel} · ожидается: ${expectedLabel}`;
-      const breakdown = parts.map(x=>{
-        const m=METHODS.find(m=>m.key===x.method)||{label:x.method};
-        return `${NF.format(x.amount)} ${m.label.split(" ")[0]}`;
-      }).join(" + ");
-      const debtLabel = expected>0 && paid<expected ? ` · долг: ${NF.format(expected-paid)}` : "";
-      return `${breakdown} · ${entriesLabel}${debtLabel}`;
+      const freeEntries=effectiveFreeEntries(p);
+      const billable=Math.max(0, entries-freeEntries);
+      const entryWord = entries===1 ? "1 вход" : `${entries} входа`;
+      const freeWord = freeEntries>0 ? ` · free entry: ${freeEntries}` : "";
+      if (expected===0) return `${entryWord}${freeWord} · бесплатно`;
+      if (paid<=0) return `${entryWord}${freeWord} · ожидается: ${NF.format(expected)}`;
+      const breakdown = parts
+        .filter(x=>clampInt(x.amount,0)>0)
+        .map(x=>`${NF.format(x.amount)} ${(METHODS.find(m=>m.key===x.method)?.label||x.method)}`)
+        .join(" + ");
+      const debt = paid<expected ? ` · долг: ${NF.format(expected-paid)}` : "";
+      const over = paid>expected ? ` · переплата: ${NF.format(paid-expected)}` : "";
+      return `${breakdown||NF.format(paid)} · ${entryWord}${freeWord}${debt}${over}`;
+    }
+    function getDraftForPlayer(p){
+      const k=keyName(p.name);
+      const existing=paymentUiDrafts.get(k);
+      if(existing) return existing;
+      const defaultBuyIn=clampInt(state?.tournament?.defaultBuyIn??1000,0);
+      const buyInValue = p?.buyIn==null ? defaultBuyIn : clampInt(p.buyIn,0);
+      let tariff = 'full';
+      if (buyInValue===0) tariff='free';
+      else if (buyInValue===Math.round(defaultBuyIn/2)) tariff='half';
+      const draft={
+        method:'card',
+        tariff,
+        freeEntry: effectiveFreeEntries(p)>0,
+        addPayment:false,
+        paymentAmount:''
+      };
+      paymentUiDrafts.set(k,draft);
+      return draft;
+    }
+    function remainingAmount(p){ return Math.max(0, calcExpected(p)-totalPaid(p)); }
+    function expectedForDraft(p,draft, defaultBuyIn=(clampInt(state?.tournament?.defaultBuyIn??1000,0))){
+      const entries = 1 + clampInt(p?.reentries??0,0);
+      let buyIn = defaultBuyIn;
+      if(draft?.tariff==='half') buyIn = Math.round(defaultBuyIn/2);
+      else if(draft?.tariff==='free') buyIn = 0;
+      const freeEntries = draft?.freeEntry ? Math.min(1, entries) : 0;
+      return Math.max(0, entries - freeEntries) * buyIn;
     }
 
     function renderPaymentSection(){
-      const container=$("paymentList"); if(!container||!state) return;
-      const present=(state.players||[]).filter(p=>p.present);
+      const paymentSection = document.getElementById("paymentSection");
+      const wasOpen = !!paymentSection?.open;
+      const container = $("paymentList");
+      if(!container || !state) return;
+
+      const present=(state.players||[]).filter(p=>p.present).sort((a,b)=>a.name.localeCompare(b.name,'ru'));
       container.innerHTML="";
       if(!present.length){
         container.innerHTML=`<div class="sub">Нет пришедших игроков</div>`;
         $("paySummary").style.display="none";
+        if(paymentSection) paymentSection.open = wasOpen;
         return;
       }
 
-      // totals
       let sumCard=0, sumCash=0, sumTransfer=0;
-
-      present.forEach((p,i)=>{
-        const color=payStatusColor(p);
-        const meta=payStatusText(p);
-
-        const row=document.createElement("div");
-        row.className="payRow";
-        row.innerHTML=`
-          <div class="payStatus ${color}"></div>
-          <div class="payMain">
-            <div class="payName">${p.name}</div>
-            <div class="payMeta">${meta}</div>
-          </div>
-          <div class="payToggle">▾</div>`;
-
-        const detail=document.createElement("div");
-        detail.className="payDetail";
-
-        function rebuildDetail(){
-          const payments=getPayments(p);
-          const re=clampInt(p.reentries??0,0);
-          const entries=1+re;
-          const expected=calcExpected(p);
-          const buyIn=clampInt(p.buyIn??0,0);
-          const expectedStr=expected>0?(re>0?`${NF.format(buyIn)} × ${entries} = ${NF.format(expected)}`:NF.format(expected)):"—";
-          const defaultBuyIn2=clampInt(state?.tournament?.defaultBuyIn??1000,0);
-          const isDefault=p.buyIn==null;
-          const isHalf=p.buyIn!=null&&clampInt(p.buyIn,0)===Math.round(defaultBuyIn2/2);
-          const isFree=p.buyIn!=null&&clampInt(p.buyIn,0)===0;
-          const isCustom=p.buyIn!=null&&!isHalf&&!isFree;
-          detail.innerHTML=`
-            <div style="font-size:11px;color:var(--muted);margin-bottom:8px;letter-spacing:.07em;text-transform:uppercase;">Взнос за 1 вход</div>
-            <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;">
-              <button type="button" class="methodBtn ghost${isDefault?' active-cash':''}" data-preset="default">
-                Стандарт ${NF.format(defaultBuyIn2)}₽
-              </button>
-              <button type="button" class="methodBtn ghost${isHalf?' active-card':''}" data-preset="half">
-                50% ${NF.format(Math.round(defaultBuyIn2/2))}₽
-              </button>
-              <button type="button" class="methodBtn ghost${isFree?' active-transfer':''}" data-preset="free">
-                Бесплатно
-              </button>
-              <button type="button" class="methodBtn ghost${isCustom?' active-card':''}" data-preset="custom">
-                Своя сумма
-              </button>
-            </div>
-            <div id="customBuyinRow_${i}" style="display:${isCustom?'grid':'none'};grid-template-columns:1fr auto;gap:8px;margin-bottom:10px;">
-              <input type="number" min="0" step="100" inputmode="numeric" placeholder="сумма"
-                value="${isCustom?clampInt(p.buyIn,0):''}"
-                style="padding:10px;border-radius:12px;font-size:15px;font-family:var(--mono);width:100%;box-sizing:border-box;"
-                id="buyin_${i}">
-              <button type="button" class="ghost" style="padding:10px 14px;" id="buyinSave_${i}">OK</button>
-            </div>
-            <div style="display:flex;gap:10px;align-items:center;padding:10px 12px;border-radius:12px;
-              background:rgba(214,178,107,.08);border:1px solid rgba(214,178,107,.18);margin-bottom:14px;font-size:13px;">
-              <span style="color:var(--muted);">${entries === 1 ? "1 вход" : (entries + " входа (1 + " + re + " re)")}</span>
-              <span style="margin-left:auto;font-weight:900;font-family:var(--mono);color:var(--gold2);">= \${expectedStr}</span>
-            </div>
-            <div style="font-size:11px;color:var(--muted);margin-bottom:8px;letter-spacing:.07em;text-transform:uppercase;">Платежи</div>
-            <div id="payLines_${i}"></div>
-            <div style="margin-top:8px;">
-              <button type="button" class="ghost" style="font-size:13px;padding:10px 14px;" id="addPay_${i}">+ Добавить платёж</button>
-            </div>`;
-
-          // render existing payment lines
-          const linesEl=detail.querySelector(`#payLines_${i}`);
-          payments.forEach((pay,pi)=>{
-            const line=document.createElement("div");
-            line.className="payLine";
-            const methodBtns=METHODS.map(m=>`<button type="button" class="methodBtn ghost ${pay.method===m.key?m.cls:''}" data-m="${m.key}" data-pi="${pi}">${m.label}</button>`).join("");
-            line.innerHTML=`
-              <div style="display:flex;gap:4px;flex-wrap:wrap;">${methodBtns}</div>
-              <input type="number" min="0" step="100" inputmode="numeric" value="${pay.amount||0}"
-                style="padding:9px;border-radius:12px;font-size:14px;font-family:var(--mono);" data-amt="${pi}">
-              <button type="button" class="miniBtn danger" data-del="${pi}">✕</button>`;
-
-            // method toggle
-            line.querySelectorAll("[data-m]").forEach(btn=>{
-              btn.addEventListener("click",async()=>{
-                const pi2=parseInt(btn.dataset.pi);
-                await saveWithReload(st=>{
-                  const pl=st.players.find(x=>keyName(x.name)===keyName(p.name));
-                  if(pl&&Array.isArray(pl.payments)&&pl.payments[pi2]) pl.payments[pi2].method=btn.dataset.m;
-                  return st;
-                });
-                // sync local ref
-                p=state.players.find(x=>keyName(x.name)===keyName(p.name))||p;
-                rebuildDetail(); updateRowMeta();
-              });
-            });
-            // amount edit
-            line.querySelector(`[data-amt="${pi}"]`).addEventListener("change",async(e)=>{
-              const amt=clampInt(e.target.value,0);
-              await saveWithReload(st=>{
-                const pl=st.players.find(x=>keyName(x.name)===keyName(p.name));
-                if(pl&&Array.isArray(pl.payments)&&pl.payments[pi]) pl.payments[pi].amount=amt;
-                return st;
-              });
-              p=state.players.find(x=>keyName(x.name)===keyName(p.name))||p;
-              updateRowMeta();
-            });
-            // delete line
-            line.querySelector(`[data-del="${pi}"]`).addEventListener("click",async()=>{
-              await saveWithReload(st=>{
-                const pl=st.players.find(x=>keyName(x.name)===keyName(p.name));
-                if(pl&&Array.isArray(pl.payments)) pl.payments.splice(pi,1);
-                return st;
-              });
-              p=state.players.find(x=>keyName(x.name)===keyName(p.name))||p;
-              rebuildDetail(); updateRowMeta();
-            });
-            linesEl.appendChild(line);
-          });
-
-          // preset buttons
-          detail.querySelectorAll("[data-preset]").forEach(btn=>{
-            btn.addEventListener("click",async()=>{
-              const preset=btn.dataset.preset;
-              const defBuyIn=clampInt(state?.tournament?.defaultBuyIn??1000,0);
-              if(preset==="custom"){
-                detail.querySelector(`#customBuyinRow_${i}`).style.display="grid";
-                detail.querySelector(`#buyin_${i}`)?.focus();
-                return;
-              }
-              const newBuyIn=preset==="default"?null:preset==="half"?Math.round(defBuyIn/2):0;
-              await saveWithReload(st=>{
-                const pl=st.players.find(x=>keyName(x.name)===keyName(p.name));
-                if(pl) pl.buyIn=newBuyIn;
-                return st;
-              });
-              p=state.players.find(x=>keyName(x.name)===keyName(p.name))||p;
-              rebuildDetail(); updateRowMeta();
-            });
-          });
-          // save custom buyIn
-          detail.querySelector(`#buyinSave_${i}`)?.addEventListener("click",async()=>{
-            const val=clampInt(detail.querySelector(`#buyin_${i}`)?.value||0,0);
-            await saveWithReload(st=>{
-              const pl=st.players.find(x=>keyName(x.name)===keyName(p.name));
-              if(pl) pl.buyIn=val;
-              return st;
-            });
-            p=state.players.find(x=>keyName(x.name)===keyName(p.name))||p;
-            rebuildDetail(); updateRowMeta();
-          });
-          detail.querySelector(`#buyin_${i}`)?.addEventListener("keydown",e=>{
-            if(e.key==="Enter") detail.querySelector(`#buyinSave_${i}`)?.click();
-          });
-
-          // add payment line
-          detail.querySelector(`#addPay_${i}`)?.addEventListener("click",async()=>{
-            await saveWithReload(st=>{
-              const pl=st.players.find(x=>keyName(x.name)===keyName(p.name));
-              if(pl){ if(!Array.isArray(pl.payments)) pl.payments=[]; pl.payments.push({amount:0,method:"cash"}); }
-              return st;
-            });
-            p=state.players.find(x=>keyName(x.name)===keyName(p.name))||p;
-            rebuildDetail();
-          });
-        }
-
-        function updateRowMeta(){
-          const freshP=state.players.find(x=>keyName(x.name)===keyName(p.name))||p;
-          row.querySelector(".payStatus").className=`payStatus ${payStatusColor(freshP)}`;
-          row.querySelector(".payMeta").textContent=payStatusText(freshP);
-          updateSummary();
-        }
-
-        // toggle detail open/close
-        const toggleEl=row.querySelector(".payToggle");
-        const mainEl=row.querySelector(".payMain");
-        [toggleEl,mainEl].forEach(el=>el.addEventListener("click",()=>{
-          const isOpen=detail.classList.contains("open");
-          if(!isOpen){ rebuildDetail(); }
-          detail.classList.toggle("open");
-          toggleEl.textContent=detail.classList.contains("open")?"▴":"▾";
-        }));
-
-        // accumulate totals
+      present.forEach(p=>{
         getPayments(p).forEach(x=>{
-          if(x.method==="card") sumCard+=clampInt(x.amount,0);
-          else if(x.method==="cash") sumCash+=clampInt(x.amount,0);
-          else if(x.method==="transfer") sumTransfer+=clampInt(x.amount,0);
+          if(x.method==='card') sumCard+=clampInt(x.amount,0);
+          else if(x.method==='cash') sumCash+=clampInt(x.amount,0);
+          else if(x.method==='transfer') sumTransfer+=clampInt(x.amount,0);
         });
-
-        const wrap=document.createElement("div");
-        wrap.appendChild(row);
-        wrap.appendChild(detail);
-        container.appendChild(wrap);
       });
 
-      // summary
+      const list=document.createElement('div');
+      list.className='payListWrap';
+      present.forEach((p)=>{
+        const payKey=keyName(p.name);
+        const draft=getDraftForPlayer(p);
+        const rem=remainingAmount(p);
+        const row=document.createElement('div');
+        row.className='payRow';
+        row.dataset.payKey=payKey;
+        const methodBtns=METHODS.map(m=>`<button type="button" class="methodBtn ghost ${draft.method===m.key?m.cls:''}" data-act="method" data-method="${m.key}" title="${m.title}">${m.label}</button>`).join('');
+        const tariffBtns=`
+          <button type="button" class="methodBtn ghost ${draft.tariff==='full'?'active-cash':''}" data-act="tariff" data-tariff="full">100%</button>
+          <button type="button" class="methodBtn ghost ${draft.tariff==='half'?'active-card':''}" data-act="tariff" data-tariff="half">50%</button>
+          <button type="button" class="methodBtn ghost ${draft.tariff==='free'?'active-transfer':''}" data-act="tariff" data-tariff="free">Free</button>
+        `;
+        const actionBtns=`
+          <button type="button" class="methodBtn ghost ${draft.freeEntry?'active-transfer':''}" data-act="freeEntry">Free entry</button>
+          <button type="button" class="methodBtn ghost ${draft.addPayment?'active-card':''}" data-act="addPayment">+ платёж</button>
+          <button type="button" class="miniBtn ghost" data-act="clear">Очистить</button>
+          <button type="button" class="miniBtn ok" data-act="save">Сохранить</button>
+        `;
+        const extraInput = draft.addPayment ? `<input type="number" min="0" step="100" inputmode="numeric" class="payInlineInput" data-act="amount" placeholder="сумма платежа" value="${String(draft.paymentAmount ?? rem)}">` : '';
+        row.innerHTML=`
+          <div class="payStatus ${payStatusColor(p)}"></div>
+          <div class="payMain" style="cursor:default;">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
+              <div style="min-width:0;">
+                <div class="payName">${p.name}</div>
+                <div class="payMeta">${payStatusText(p)}</div>
+              </div>
+              <div class="payMeta" style="text-align:right;white-space:nowrap;">остаток: ${NF.format(rem)}</div>
+            </div>
+            <div class="payToolbar">
+              <div class="payBtns">${methodBtns}</div>
+              <div class="payBtns">${tariffBtns}</div>
+              <div class="payBtns">${actionBtns}</div>
+              ${extraInput}
+            </div>
+          </div>`;
+
+        row.querySelectorAll('[data-act="method"]').forEach(btn=>btn.addEventListener('click', async e=>{
+          e.preventDefault(); e.stopPropagation();
+          const method=btn.dataset.method;
+          const currentDraft={...draft, method};
+          const expectedDraft = expectedForDraft(p, currentDraft);
+          const paidNow = totalPaid(p);
+          const defaultAmount = currentDraft.addPayment ? Math.max(0, expectedDraft - paidNow) : expectedDraft;
+          const halfAmount = Math.round(expectedDraft/2);
+          const modalResult = await openPaymentAmountModal({
+            playerName:p.name,
+            method,
+            defaultAmount,
+            fullAmount:expectedDraft,
+            halfAmount,
+            restAmount:Math.max(0, expectedDraft - paidNow)
+          });
+          if(!modalResult) return;
+          const amt = clampInt(modalResult.amount, 0);
+          const finalMethod = modalResult.method || method;
+          await saveWithReload(st=>{
+            const pl=st.players.find(x=>keyName(x.name)===payKey);
+            if(!pl) return st;
+            const defaultBuyIn=clampInt(st?.tournament?.defaultBuyIn??1000,0);
+            let newBuyIn = null;
+            if(currentDraft.tariff==='half') newBuyIn=Math.round(defaultBuyIn/2);
+            else if(currentDraft.tariff==='free') newBuyIn=0;
+            else newBuyIn=null;
+            pl.buyIn=newBuyIn;
+            const entries = 1 + clampInt(pl?.reentries??0,0);
+            pl.freeEntries=currentDraft.freeEntry ? Math.min(1, entries) : 0;
+            if(!Array.isArray(pl.payments)) pl.payments=[];
+            const effectiveBuyInLocal = (pl.buyIn==null ? defaultBuyIn : clampInt(pl.buyIn,0));
+            const expected = Math.max(0, entries - Math.max(0, Math.min(entries, clampInt(pl.freeEntries??0,0)))) * effectiveBuyInLocal;
+            if(expected===0){
+              pl.payments=[];
+            } else if(currentDraft.addPayment){
+              if(amt>0) pl.payments.push({method:finalMethod, amount:amt});
+            } else {
+              if(amt>0) pl.payments=[{method:finalMethod, amount:amt}];
+              else pl.payments=[];
+            }
+            return st;
+          });
+          const fresh=state?.players?.find(x=>keyName(x.name)===payKey) || p;
+          paymentUiDrafts.set(payKey, {
+            method:finalMethod,
+            addPayment:false,
+            paymentAmount:'',
+            freeEntry: effectiveFreeEntries(fresh)>0,
+            tariff: (function(){
+              const def=clampInt(state?.tournament?.defaultBuyIn??1000,0);
+              const b = fresh?.buyIn==null ? def : clampInt(fresh.buyIn,0);
+              if(b===0) return 'free';
+              if(b===Math.round(def/2)) return 'half';
+              return 'full';
+            })()
+          });
+          renderPaymentSection();
+        }));
+        row.querySelectorAll('[data-act="tariff"]').forEach(btn=>btn.addEventListener('click', async e=>{
+          e.preventDefault(); e.stopPropagation();
+          const clickedTariff = btn.dataset.tariff || 'full';
+          const current = paymentUiDrafts.get(payKey) || getDraftForPlayer(p);
+          await saveWithReload(st=>{
+            const pl=st.players.find(x=>keyName(x.name)===payKey);
+            if(!pl) return st;
+            const defaultBuyIn=clampInt(st?.tournament?.defaultBuyIn??1000,0);
+            if(clickedTariff==='half') pl.buyIn=Math.round(defaultBuyIn/2);
+            else if(clickedTariff==='free') pl.buyIn=0;
+            else pl.buyIn=null;
+            const entries = 1 + clampInt(pl?.reentries??0,0);
+            if(clickedTariff==='free' && !current.freeEntry){
+              // only tariff changes here; free entry stays as user set it
+              pl.freeEntries=Math.max(0, Math.min(entries, clampInt(pl.freeEntries??0,0)));
+            }
+            const effectiveBuyInLocal = (pl.buyIn==null ? defaultBuyIn : clampInt(pl.buyIn,0));
+            const expected = Math.max(0, entries - Math.max(0, Math.min(entries, clampInt(pl.freeEntries??0,0)))) * effectiveBuyInLocal;
+            if(expected===0) pl.payments=[];
+            return st;
+          });
+          const fresh=state?.players?.find(x=>keyName(x.name)===payKey) || p;
+          paymentUiDrafts.set(payKey,{
+            ...(paymentUiDrafts.get(payKey)||current),
+            tariff: clickedTariff,
+            freeEntry: effectiveFreeEntries(fresh)>0
+          });
+          renderPaymentSection();
+        }));
+        row.querySelector('[data-act="freeEntry"]')?.addEventListener('click', async e=>{
+          e.preventDefault(); e.stopPropagation();
+          const current = paymentUiDrafts.get(payKey) || getDraftForPlayer(p);
+          const nextFreeEntry=!current.freeEntry;
+          await saveWithReload(st=>{
+            const pl=st.players.find(x=>keyName(x.name)===payKey);
+            if(!pl) return st;
+            const entries = 1 + clampInt(pl?.reentries??0,0);
+            pl.freeEntries = nextFreeEntry ? Math.min(1, entries) : 0;
+            const defaultBuyIn=clampInt(st?.tournament?.defaultBuyIn??1000,0);
+            const effectiveBuyInLocal = (pl.buyIn==null ? defaultBuyIn : clampInt(pl.buyIn,0));
+            const expected = Math.max(0, entries - Math.max(0, Math.min(entries, clampInt(pl.freeEntries??0,0)))) * effectiveBuyInLocal;
+            if(expected===0) pl.payments=[];
+            return st;
+          });
+          const fresh=state?.players?.find(x=>keyName(x.name)===payKey) || p;
+          paymentUiDrafts.set(payKey,{
+            ...(paymentUiDrafts.get(payKey)||current),
+            freeEntry: effectiveFreeEntries(fresh)>0,
+            tariff: (function(){
+              const def=clampInt(state?.tournament?.defaultBuyIn??1000,0);
+              const b = fresh?.buyIn==null ? def : clampInt(fresh.buyIn,0);
+              if(b===0) return 'free';
+              if(b===Math.round(def/2)) return 'half';
+              return 'full';
+            })()
+          });
+          renderPaymentSection();
+        });
+        row.querySelector('[data-act="addPayment"]')?.addEventListener('click',e=>{
+          e.preventDefault(); e.stopPropagation();
+          const turnedOn=!draft.addPayment;
+          const nextDraft={...draft, addPayment:turnedOn};
+          if(turnedOn){
+            const suggested = Math.max(0, rem);
+            nextDraft.paymentAmount = String(String(draft.paymentAmount||'').trim() ? draft.paymentAmount : suggested);
+          } else {
+            nextDraft.paymentAmount = '';
+          }
+          paymentUiDrafts.set(payKey,nextDraft);
+          renderPaymentSection();
+        });
+        row.querySelector('[data-act="amount"]')?.addEventListener('input',e=>{
+          const nextDraft={...draft, paymentAmount:String(e.target.value??'')};
+          paymentUiDrafts.set(payKey,nextDraft);
+        });
+        row.querySelector('[data-act="clear"]')?.addEventListener('click', async e=>{
+          e.preventDefault(); e.stopPropagation();
+          await saveWithReload(st=>{
+            const pl=st.players.find(x=>keyName(x.name)===payKey);
+            if(!pl) return st;
+            pl.buyIn=null;
+            pl.freeEntries=0;
+            pl.payments=[];
+            return st;
+          });
+          paymentUiDrafts.set(payKey,{method:'card',tariff:'full',freeEntry:false,addPayment:false,paymentAmount:''});
+          renderPaymentSection();
+        });
+        row.querySelector('[data-act="save"]')?.addEventListener('click', async e=>{
+          e.preventDefault(); e.stopPropagation();
+          const currentDraft={...draft};
+          await saveWithReload(st=>{
+            const pl=st.players.find(x=>keyName(x.name)===payKey);
+            if(!pl) return st;
+            const defaultBuyIn=clampInt(st?.tournament?.defaultBuyIn??1000,0);
+            let newBuyIn = null;
+            if(currentDraft.tariff==='half') newBuyIn=Math.round(defaultBuyIn/2);
+            else if(currentDraft.tariff==='free') newBuyIn=0;
+            else newBuyIn=null;
+            pl.buyIn=newBuyIn;
+            const entries = 1 + clampInt(pl?.reentries??0,0);
+            pl.freeEntries=currentDraft.freeEntry ? Math.min(1, entries) : 0;
+            if(!Array.isArray(pl.payments)) pl.payments=[];
+
+            const effectiveBuyInLocal = (pl.buyIn==null ? defaultBuyIn : clampInt(pl.buyIn,0));
+            const expected = Math.max(0, entries - Math.max(0, Math.min(entries, clampInt(pl.freeEntries??0,0)))) * effectiveBuyInLocal;
+
+            if(currentDraft.addPayment){
+              const alreadyPaid = pl.payments.reduce((s,x)=>s+clampInt(x.amount,0),0);
+              const rawAmt = String(currentDraft.paymentAmount ?? '').trim();
+              const amt = clampInt(rawAmt==='' ? Math.max(0, expected-alreadyPaid) : rawAmt,0);
+              if(amt>0) pl.payments.push({method:currentDraft.method, amount:amt});
+            } else {
+              if(expected===0){
+                pl.payments=[];
+              } else if(pl.payments.length<=1){
+                pl.payments=[{method:currentDraft.method, amount:expected}];
+              } else {
+                const others = pl.payments.slice(1).filter(x=>clampInt(x.amount,0)>0);
+                const othersSum = others.reduce((s,x)=>s+clampInt(x.amount,0),0);
+                const firstAmount = Math.max(0, expected - othersSum);
+                pl.payments=[{method:currentDraft.method, amount:firstAmount}, ...others];
+              }
+            }
+            return st;
+          });
+          const fresh=state?.players?.find(x=>keyName(x.name)===payKey) || p;
+          paymentUiDrafts.set(payKey, {
+            method:'card',
+            addPayment:false,
+            paymentAmount:'',
+            freeEntry: effectiveFreeEntries(fresh)>0,
+            tariff: (function(){
+              const def=clampInt(state?.tournament?.defaultBuyIn??1000,0);
+              const b = fresh?.buyIn==null ? def : clampInt(fresh.buyIn,0);
+              if(b===0) return 'free';
+              if(b===Math.round(def/2)) return 'half';
+              return 'full';
+            })()
+          });
+          renderPaymentSection();
+        });
+
+        list.appendChild(row);
+      });
+      container.appendChild(list);
+
       const total=sumCard+sumCash+sumTransfer;
       $("sumCard").textContent=NF.format(sumCard);
       $("sumCash").textContent=NF.format(sumCash);
       $("sumTransfer").textContent=NF.format(sumTransfer);
       $("sumTotal").textContent=NF.format(total);
-      $("paySummary").style.display=total>0||present.length?"grid":"none";
+      $("paySummary").style.display='grid';
+      if(paymentSection) paymentSection.open=wasOpen;
     }
 
     function updateSummary(){
@@ -1261,17 +1535,18 @@
       const present=(state.players||[]).filter(p=>p.present);
       let sc=0,sx=0,st2=0;
       present.forEach(p=>getPayments(p).forEach(x=>{
-        if(x.method==="card") sc+=clampInt(x.amount,0);
-        else if(x.method==="cash") sx+=clampInt(x.amount,0);
-        else if(x.method==="transfer") st2+=clampInt(x.amount,0);
+        if(x.method==='card') sc+=clampInt(x.amount,0);
+        else if(x.method==='cash') sx+=clampInt(x.amount,0);
+        else if(x.method==='transfer') st2+=clampInt(x.amount,0);
       }));
       $("sumCard").textContent=NF.format(sc);
       $("sumCash").textContent=NF.format(sx);
       $("sumTransfer").textContent=NF.format(st2);
       $("sumTotal").textContent=NF.format(sc+sx+st2);
+      $("paySummary").style.display='grid';
     }
 
-    // ===== rooms list ─────────────────────────────────────────────────────────
+// ===== rooms list ─────────────────────────────────────────────────────────
     async function loadRooms(){
       const list=$("roomsList"); if(!list)return;
       list.innerHTML=`<div class="sub">Загрузка...</div>`;
@@ -1519,30 +1794,30 @@
         tbody.appendChild(tr);
         // ── visible card ──
         const card=document.createElement("div");
-        card.style.cssText="display:grid;grid-template-columns:28px 70px 1fr 1fr 1fr 60px auto;gap:6px;align-items:center;padding:8px 10px;background:rgba(0,0,0,.18);border:1px solid rgba(255,255,255,.08);border-radius:12px;";
+        card.className="levelCard";
         card.innerHTML=`
           <span style="font-size:11px;color:var(--muted);font-family:var(--mono)">${lv.isBreak?"—":++_playNo}</span>
-          <select data-k="type" style="padding:8px 6px;border-radius:10px;font-size:13px;${type==='break'?'color:var(--gold)':''}">
+          <select data-k="type" class="typeSel" style="padding:8px 6px;border-radius:10px;font-size:13px;${type==='break'?'color:var(--gold)':''}">
             <option value="level"${type==="level"?" selected":""}>Level</option>
             <option value="break"${type==="break"?" selected":""}>Break</option>
           </select>
-          <div style="display:flex;flex-direction:column;gap:2px;">
+          <div class="fieldMin" style="display:flex;flex-direction:column;gap:2px;">
             <span style="font-size:10px;color:var(--muted);letter-spacing:.06em;">MIN</span>
             <input data-k="min" type="number" min="0" step="1" value="${min}" style="padding:8px 6px;border-radius:10px;font-size:14px;width:100%;box-sizing:border-box;">
           </div>
-          <div style="display:flex;flex-direction:column;gap:2px;">
+          <div class="fieldSb" style="display:flex;flex-direction:column;gap:2px;">
             <span style="font-size:10px;color:var(--muted);letter-spacing:.06em;">SB</span>
             <input data-k="sb" type="number" min="0" step="1" value="${sb}" ${type==="break"?"disabled":""} style="padding:8px 6px;border-radius:10px;font-size:14px;width:100%;box-sizing:border-box;">
           </div>
-          <div style="display:flex;flex-direction:column;gap:2px;">
+          <div class="fieldBb" style="display:flex;flex-direction:column;gap:2px;">
             <span style="font-size:10px;color:var(--muted);letter-spacing:.06em;">BB</span>
             <input data-k="bb" type="number" min="0" step="1" value="${bb}" ${type==="break"?"disabled":""} style="padding:8px 6px;border-radius:10px;font-size:14px;width:100%;box-sizing:border-box;">
           </div>
-          <select data-k="ante" ${type==="break"?"disabled":""} style="padding:8px 6px;border-radius:10px;font-size:13px;">
+          <select data-k="ante" class="fieldAnte" ${type==="break"?"disabled":""} style="padding:8px 6px;border-radius:10px;font-size:13px;">
             <option value="NONE"${ante==="NONE"?" selected":""}>—</option>
             <option value="BB"${ante==="BB"?" selected":""}>BB</option>
           </select>
-          <div style="display:flex;gap:4px;">
+          <div class="levelActions">
             <button type="button" class="miniBtn ghost" data-act="up" style="padding:8px 9px;">↑</button>
             <button type="button" class="miniBtn ghost" data-act="down" style="padding:8px 9px;">↓</button>
             <button type="button" class="miniBtn danger" data-act="del" style="padding:8px 9px;">✕</button>
@@ -1780,7 +2055,10 @@
       if (realtimeChannel) sb.removeChannel(realtimeChannel);
       realtimeChannel=sb.channel("rooms-"+roomId)
         .on("postgres_changes",{event:"UPDATE",schema:"public",table:"rooms",filter:`room_id=eq.${roomId}`},
-            payload=>{ state=normalizeState(payload.new.state); renderAll(); setSync("rt"); setTimeout(()=>{ if ($("syncText").textContent.includes("rt")) setSync("ok"); },300); })
+            payload=>{
+              if (Date.now() < suppressRealtimeUntil) return;
+              state=normalizeState(payload.new.state); renderAll(); setSync("rt"); setTimeout(()=>{ if ($("syncText").textContent.includes("rt")) setSync("ok"); },300);
+            })
         .subscribe();
     }
 
@@ -1862,3 +2140,8 @@
   </script>
 </body>
 </html>
+<style>
+    @media (max-width: 900px){
+      .kpis{ grid-template-columns:1fr; }
+    }
+</style>

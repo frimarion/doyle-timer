@@ -26,6 +26,7 @@
     main.grid.noRating{grid-template-columns:minmax(0,1fr) minmax(260px,320px);}
     main.grid.noRating .maincard{justify-self:center;width:min(980px,100%);}
     .card{background:var(--card);border:1px solid var(--stroke);border-radius:var(--radius);box-shadow:var(--shadow);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);min-height:0;}
+    .vSpacer{flex:1 1 auto;}
     .hidden{display:none !important;}
     .maincard{padding:18px 18px 16px;display:flex;flex-direction:column;justify-content:flex-start;gap:10px;position:relative;overflow:hidden;min-width:0;}
     .maincard::before{content:"";position:absolute;inset:-2px;border-radius:var(--radius);background:radial-gradient(900px 400px at 20% 0%,rgba(242,210,138,.10),transparent 55%);pointer-events:none;}
@@ -90,14 +91,16 @@
       </aside>
       <section class="card maincard">
         <div class="levelTop">
-          <div id="level" class="level">Level</div>
+          <div id="level" class="level">Уровень</div>
           <div id="status" class="status">—</div>
         </div>
+        <div class="vSpacer"></div>
         <div class="blindsSub" id="blindsLabel">Current blinds</div>
         <div class="blindsBox">
           <div id="blindsMain" class="blindsMain">—</div>
           <div id="anteLine" class="anteLine"></div>
         </div>
+        <div class="vSpacer"></div>
         <div class="timeRow">
           <div id="time" class="time">--:--</div>
           <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;">
@@ -118,7 +121,6 @@
         </div>
       </section>
       <aside class="card sidecard">
-        <div class="sideTitle">Турнир</div>
         <div id="stats"></div>
       </aside>
     </main>
@@ -222,7 +224,7 @@
         overlay.style.display='none';
       }
 
-      document.getElementById('level').textContent=lv.isBreak?(lv.label||'Перерыв'):`Level ${playNo}`;
+      document.getElementById('level').textContent=lv.isBreak?(lv.label||'Перерыв'):`Уровень ${playNo}`;
       document.getElementById('status').textContent=!ti.isRunning?'STOPPED':(isOnBreak||isScheduledBreak)?'BREAK':(ti.isPaused?'PAUSED':'RUNNING');
       const blindsLabel=document.getElementById('blindsLabel'),blindsMain=document.getElementById('blindsMain'),anteLine=document.getElementById('anteLine');
       if(lv.isBreak){blindsLabel.textContent='Break';if(lastBlindsText!=='—'){blindsMain.textContent='—';lastBlindsText='—';}anteLine.textContent='';}
@@ -245,7 +247,9 @@
       if(nextLv){if(nextLv.isBreak)nextEl.innerHTML=`Next: <b>${nextLv.label||'Break'}</b>`;else{const parts=[NF.format(nextLv.sb),NF.format(nextLv.bb)];if(nextLv.anteMode==="BB")parts.push(NF.format(nextLv.bb));nextEl.innerHTML=`Next: <b>${parts.join(' / ')}</b>`;}}else nextEl.textContent='Next: —';
       const st=state.stats||{};
       const lateRegLvl=clampInt(state.tournament?.lateRegUntilLevel??0,0);
-      const lateRegHtml=lateRegLvl>0?statRow('Поздняя рег. до уровня',String(lateRegLvl)):'';
+      const curLevelNum=clampInt((ti.levelIndex??0)+1,1);
+      const showLateReg=lateRegLvl>0 && curLevelNum<=lateRegLvl;
+      const lateRegHtml=showLateReg?statRow('Поздняя рег. до уровня',String(lateRegLvl)):'';
       // "перерыв через" — find next break in structure, calc total time until it
       let breakSoonHtml='';
       if(!isOnBreak && !isScheduledBreak && ti.isRunning && !ti.isPaused){
@@ -277,8 +281,8 @@
       document.getElementById('stats').innerHTML=
         statRow('В игре',`${st.alive??0} из ${st.registered??0}`)+
         lateRegHtml+
+        (showLateReg?statRow('Стартовый стек',NF.format(state.tournament?.startStack??0)):'')+
         breakSoonHtml+
-        statRow('Стартовый стек',NF.format(state.tournament?.startStack??0))+
         statRow('Средний стек',NF.format(calcAvg()),true)+
         statRow('Фишек в игре',NF.format(calcTotalChips()),true);
     }
