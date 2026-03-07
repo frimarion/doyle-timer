@@ -1264,10 +1264,12 @@
         $("err").textContent="";
         const url = window.GSHEETS_REPORT_URL;
         if(!url) throw new Error("GSHEETS_REPORT_URL не задан");
-        if(!state) throw new Error("Нет данных турнира");
-        const players = (state.players||[]).filter(p=>p.present);
+        const st = state || await loadStateFresh();
+        if (!st) throw new Error("Нет данных турнира");
+        state = st;
+        const players = (st.players||[]).filter(p=>p.present);
         if(!players.length) throw new Error("Нет пришедших игроков для отчета");
-        const date = state?.tournament?.createdAt || new Date().toISOString();
+        const date = st?.tournament?.createdAt || new Date().toISOString();
         const rows = players.map(p=>{
           const entries = 1 + clampInt(p?.reentries??0,0);
           const buyIn = effectiveBuyIn(p);
