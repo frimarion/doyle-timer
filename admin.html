@@ -117,7 +117,8 @@
     td input, td select{ padding:10px; border-radius:12px; font-size:14px; height:40px; }
     td .miniBtn{ padding:9px 10px; border-radius:12px; font-size:12px; }
     details{ border:1px solid rgba(255,255,255,.08); border-radius:16px; background:rgba(0,0,0,.12); padding:10px 12px; }
-    details summary{ cursor:pointer; font-weight:900; color:rgba(243,243,246,.90); user-select:none; }
+    details summary{ cursor:pointer; font-weight:800; font-size:15px; line-height:1.2; color:rgba(243,243,246,.90); user-select:none; }
+    @media(max-width:640px){ details summary{ font-size:14px; } }
     details .sub{ margin-top:10px; }
     .err{ margin-top:10px; color:var(--danger); font-weight:900; min-height:18px; }
     .sticky{
@@ -160,7 +161,7 @@
     .accordion{ border:1px solid rgba(255,255,255,.08); border-radius:16px; overflow:hidden; background:rgba(255,255,255,.02); }
     .accordion-header{
       width:100%; display:flex; align-items:center; justify-content:space-between; gap:12px;
-      padding:14px; background:transparent; border:0; color:var(--text); font-weight:800; font-size:16px;
+      padding:13px 14px; background:transparent; border:0; color:var(--text); font-weight:700; font-size:15px;
       cursor:pointer; -webkit-tap-highlight-color:transparent;
     }
     .accordion-header:active{ transform:translateY(1px); }
@@ -246,12 +247,14 @@
     }
 
 
-    .levelCard{display:grid;grid-template-columns:28px 70px 1fr 1fr 1fr 64px auto;gap:6px;align-items:center;padding:8px 10px;background:rgba(0,0,0,.18);border:1px solid rgba(255,255,255,.08);border-radius:12px;}
+    .levelCard{display:grid;grid-template-columns:28px 80px .9fr .9fr 1.05fr auto;gap:6px;align-items:end;padding:8px 10px;background:rgba(0,0,0,.18);border:1px solid rgba(255,255,255,.08);border-radius:12px;}
     .levelActions{display:flex;gap:4px;}
+    .fieldAnte .fieldLabel{white-space:nowrap;}
     @media(max-width:640px){
-      .levelCard{grid-template-columns:28px 1fr 1fr;gap:8px;padding:10px;}
-      .levelCard .typeSel{grid-column:2 / 4;}
+      .levelCard{grid-template-columns:28px minmax(74px,84px) minmax(0,.9fr) minmax(0,.9fr) minmax(0,1.05fr);gap:8px;padding:10px;align-items:end;}
+      .levelCard .typeSel{grid-column:2 / 6;}
       .levelCard .fieldMin,.levelCard .fieldSb,.levelCard .fieldBb,.levelCard .fieldAnte{grid-column:auto;}
+      .levelCard .fieldAnte{min-width:72px;}
       .levelCard .levelActions{grid-column:1 / -1;display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:4px;}
       .levelCard .levelActions .miniBtn{width:100%;padding:10px 0;font-size:14px;}
       #tabStructure .btnrow{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
@@ -460,6 +463,11 @@
         <details style="margin-top:12px;" id="paymentSection">
           <summary>Оплата</summary>
           <div class="sub" style="margin-bottom:12px;">Только пришедшие игроки. Нажми на игрока чтобы внести платёж.</div>
+          <div class="payToolbar">
+            <div class="payBtns">
+              <button id="btnPaymentsReport" type="button" class="ghost">Сформировать отчет</button>
+            </div>
+          </div>
           <div id="paymentList"></div>
           <div class="paySummary" id="paySummary" style="display:none;">
             <div class="paySumCard"><div class="paySumLabel">💳 Карта</div><div class="paySumValue" id="sumCard">0</div></div>
@@ -1099,6 +1107,7 @@
         try{ $("err").textContent=""; $("postOut").value=buildTelegramPostFromState(state||{}); $("postInfo").textContent="ready"; }catch(e){ $("err").textContent=e.message||String(e); }
       });
       $("btnClearPost")?.addEventListener("click",()=>{ $("postOut").value=""; $("postInfo").textContent=""; });
+      $("btnPaymentsReport")?.addEventListener("click",()=>{ sendPaymentsReport(); });
       renderPaymentSection();
     }
 
@@ -1249,6 +1258,56 @@
       else if(draft?.tariff==='free') buyIn = 0;
       const freeEntries = draft?.freeEntry ? Math.min(1, entries) : 0;
       return Math.max(0, entries - freeEntries) * buyIn;
+    }
+    async function sendPaymentsReport(){
+      try{
+        $("err").textContent="";
+        const url = window.GSHEETS_REPORT_URL;
+        if(!url) throw new Error("GSHEETS_REPORT_URL не задан");
+        if(!state) throw new Error("Нет данных турнира");
+        const players = (state.players||[]).filter(p=>p.present);
+        if(!players.length) throw new Error("Нет пришедших игроков для отчета");
+        const date = state?.tournament?.createdAt || new Date().toISOString();
+        const rows = players.map(p=>{
+          const entries = 1 + clampInt(p?.reentries??0,0);
+          const buyIn = effectiveBuyIn(p);
+          const freeEntry = effectiveFreeEntries(p);
+          const expected = calcExpected(p);
+          const paid = totalPaid(p);
+          const debt = Math.max(0, expected - paid);
+          let card=0,cash=0,transfer=0;
+          getPayments(p).forEach(pay=>{
+            const amt=clampInt(pay.amount,0);
+            if(pay.method==="card") card+=amt;
+            else if(pay.method==="cash") cash+=amt;
+            else if(pay.method==="transfer") transfer+=amt;
+          });
+          return {
+            date,
+            tournament: roomId,
+            player: p.name,
+            status: p.status || "registered",
+            entries,
+            buyIn,
+            freeEntry,
+            total: expected,
+            paid,
+            debt,
+            card,
+            cash,
+            transfer
+          };
+        });
+        const resp = await fetch(url,{
+          method:"POST",
+          headers:{"Content-Type":"application/json"},
+          body: JSON.stringify({ type:"payments_report", rows })
+        });
+        if(!resp.ok) throw new Error("Ошибка отправки отчета");
+        $("err").textContent="Отчет отправлен";
+      }catch(e){
+        $("err").textContent=e.message || String(e);
+      }
     }
 
     function renderPaymentSection(){
@@ -1802,21 +1861,24 @@
             <option value="break"${type==="break"?" selected":""}>Break</option>
           </select>
           <div class="fieldMin" style="display:flex;flex-direction:column;gap:2px;">
-            <span style="font-size:10px;color:var(--muted);letter-spacing:.06em;">MIN</span>
+            <span class="fieldLabel" style="font-size:10px;color:var(--muted);letter-spacing:.06em;">MIN</span>
             <input data-k="min" type="number" min="0" step="1" value="${min}" style="padding:8px 6px;border-radius:10px;font-size:14px;width:100%;box-sizing:border-box;">
           </div>
           <div class="fieldSb" style="display:flex;flex-direction:column;gap:2px;">
-            <span style="font-size:10px;color:var(--muted);letter-spacing:.06em;">SB</span>
+            <span class="fieldLabel" style="font-size:10px;color:var(--muted);letter-spacing:.06em;">SB</span>
             <input data-k="sb" type="number" min="0" step="1" value="${sb}" ${type==="break"?"disabled":""} style="padding:8px 6px;border-radius:10px;font-size:14px;width:100%;box-sizing:border-box;">
           </div>
           <div class="fieldBb" style="display:flex;flex-direction:column;gap:2px;">
-            <span style="font-size:10px;color:var(--muted);letter-spacing:.06em;">BB</span>
+            <span class="fieldLabel" style="font-size:10px;color:var(--muted);letter-spacing:.06em;">BB</span>
             <input data-k="bb" type="number" min="0" step="1" value="${bb}" ${type==="break"?"disabled":""} style="padding:8px 6px;border-radius:10px;font-size:14px;width:100%;box-sizing:border-box;">
           </div>
-          <select data-k="ante" class="fieldAnte" ${type==="break"?"disabled":""} style="padding:8px 6px;border-radius:10px;font-size:13px;">
-            <option value="NONE"${ante==="NONE"?" selected":""}>—</option>
-            <option value="BB"${ante==="BB"?" selected":""}>BB</option>
-          </select>
+          <div class="fieldAnte" style="display:flex;flex-direction:column;gap:2px;">
+            <span class="fieldLabel" style="font-size:10px;color:var(--muted);letter-spacing:.06em;">ANTE</span>
+            <select data-k="ante" ${type==="break"?"disabled":""} style="padding:8px 6px;border-radius:10px;font-size:13px;width:100%;box-sizing:border-box;">
+              <option value="NONE"${ante==="NONE"?" selected":""}>—</option>
+              <option value="BB"${ante==="BB"?" selected":""}>BB</option>
+            </select>
+          </div>
           <div class="levelActions">
             <button type="button" class="miniBtn ghost" data-act="up" style="padding:8px 9px;">↑</button>
             <button type="button" class="miniBtn ghost" data-act="down" style="padding:8px 9px;">↓</button>

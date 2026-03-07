@@ -266,8 +266,18 @@
       const curLevelNum=clampInt((ti.levelIndex??0)+1,1);
       const showLateReg=lateRegLvl>0 && curLevelNum<=lateRegLvl;
       const lateRegRemainSec=lateRegRemainingSec();
+      let lateRegStr='';
+      if(showLateReg){
+        const totalMins=Math.ceil(lateRegRemainSec/60);
+        if(totalMins>=60){
+          const h=Math.floor(totalMins/60), m=totalMins%60;
+          lateRegStr=m>0?`${h} ч ${m} мин`:`${h} ч`;
+        } else {
+          lateRegStr=`${totalMins} мин`;
+        }
+      }
       const isLastLateRegLevel=showLateReg && curLevelNum===lateRegLvl;
-      const lateRegHtml=showLateReg?statRow('Поздняя регистрация',fmtTime(lateRegRemainSec),false,isLastLateRegLevel?'danger':''):'';
+      const lateRegHtml=showLateReg?statRow('Поздняя регистрация',lateRegStr,false,isLastLateRegLevel?'danger':''):'';
       // "перерыв через" — find next break in structure, calc total time until it
       let breakSoonHtml='';
       if(!isOnBreak && !isScheduledBreak && ti.isRunning && !ti.isPaused){
