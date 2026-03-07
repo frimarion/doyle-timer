@@ -1300,12 +1300,22 @@
         });
         const resp = await fetch(url,{
           method:"POST",
-          headers:{"Content-Type":"application/json"},
+          headers:{"Content-Type":"text/plain;charset=utf-8"},
           body: JSON.stringify({ type:"payments_report", rows })
         });
-        if(!resp.ok) throw new Error("Ошибка отправки отчета");
-        $("err").textContent="Отчет отправлен";
+        const text = await resp.text();
+        let data = null;
+        try { data = JSON.parse(text); } catch(e) {}
+        if(!resp.ok){
+          throw new Error((data && data.error) || text || `HTTP ${resp.status}`);
+        }
+        if(data && data.ok === false){
+          throw new Error(data.error || "Ошибка выгрузки в Google Sheets");
+        }
+        const count = data && (data.count ?? data.rowsWritten ?? data.rows?.length);
+        $("err").textContent = count!=null ? `Отчет отправлен (${count})` : "Отчет отправлен";
       }catch(e){
+        console.error("sendPaymentsReport failed",e);
         $("err").textContent=e.message || String(e);
       }
     }
